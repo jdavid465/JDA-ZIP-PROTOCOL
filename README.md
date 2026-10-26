@@ -54,6 +54,20 @@ Today, Artificial Intelligence has two massive bottlenecks: **network bandwidth 
 
 ## 💡 How It Works / Como Funciona
 
+### ⚡ How JDA-ZIP differs from existing solutions / Como o JDA-ZIP se diferencia das soluções existentes
+
+**EN:** Unlike traditional text compression tools or AI-driven token pruning:
+
+* **Unlike Gzip / ZIP (Byte-level Compression):** Traditional compression operates on raw bytes without understanding data structure, intent, or semantic meaning.
+* **Unlike LLMLingua / Token Pruning (Lossy Pruning):** JDA-ZIP doesn't discard words or guess meaning through estimations. The original context is preserved and reconstructed 100% deterministically.
+* **Lightweight for Edge & Mobile:** Compression and mapping rely on lightweight local dictionaries, eliminating the need for heavy compute or GPUs on your smartphone or edge device.
+
+**PT:** Ao contrário das ferramentas tradicionais de compressão de texto ou de poda por IA:
+
+* **Diferente do Gzip / ZIP (Compressão por Bytes):** A compressão tradicional opera em nível de bytes brutos e não compreende a estrutura, a intenção ou o significado semântico dos dados.
+* **Diferente do LLMLingua / Token Pruning (Poda com Perdas):** O JDA-ZIP não descarta palavras nem tenta adivinhar o significado do texto através de estimativas. O contexto original é preservado e reconstruído de forma 100% determinística.
+* **Leve para Edge & Dispositivos Móveis:** A compressão e o mapeamento acontecem por meio de dicionários locais extremamente leves, descartando a necessidade de processamento pesado ou GPUs no seu smartphone ou dispositivo edge.
+
 **EN:** The **JDA-ZIP Protocol** is an intelligent method for **semantic communication**. Instead of focusing on letters and syntax, it focuses entirely on the *meaning* of the message. The protocol operates through two main modules:
 
 **PT:** *O **JDA-ZIP Protocol** é um método inteligente de **comunicação semântica**. Em vez de focar nas letras e sintaxe, ele foca inteiramente no sentido da mensagem. O protocolo funciona em dois módulos principais:*
