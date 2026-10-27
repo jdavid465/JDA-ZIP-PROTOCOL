@@ -1,3 +1,11 @@
+# JDA-ZIP Protocol
+> Protocolo de compactação de texto zero-server baseado em navegador.
+
+🚀 **[Acessar o JDA-ZIP Online (Laboratório & Central)](https://jdavid465.github.io/JDA-ZIP-PROTOCOL/)**
+
+---
+
+
 # 🚀 JDA-ZIP Protocol
 
 ### **A Simple Idea to Shorten Repeated Text Sent to AIs (Under Testing)**
