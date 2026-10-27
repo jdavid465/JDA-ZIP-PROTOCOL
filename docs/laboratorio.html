@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JDA-ZIP — Laboratório</title>
+  
+  <!-- Bibliotecas para leitura local de DOCX e PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
   <style>
     :root {
       --bg: #0d1117;
@@ -64,8 +72,15 @@
 
     .options-row {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .option-btn {
@@ -80,16 +95,17 @@
       transition: all 0.2s;
     }
 
-    .option-btn:hover:not(:disabled), .option-btn.active {
+    .option-btn:hover, .option-btn.active {
       border-color: var(--accent);
       color: var(--accent);
       background: rgba(88, 166, 255, 0.05);
     }
 
-    .option-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      border-color: var(--border);
+    .upload-info {
+      font-size: 0.73rem;
+      color: var(--muted);
+      max-width: 180px;
+      line-height: 1.2;
     }
 
     /* Menu Gaveta de Fatiamento (Apenas Números) */
@@ -228,16 +244,27 @@
     </header>
 
     <div class="config-grid">
-      <!-- Origem do Dicionário + Botão Upload Desativado -->
+      <!-- Origem do Dicionário + Botão Upload com Descrição Explicativa -->
       <div class="box-config">
-        <h3>1. Origem do Dicionário</h3>
+        <h3>1. Origem do Dicionário & Entrada</h3>
         <div class="options-row">
           <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">🔄 Gerar Automático</button>
-          <button class="option-btn" id="btn-upload" disabled title="Em breve">📎 Anexar Arquivo (Em breve)</button>
-          <label class="option-btn" id="btn-importar" style="cursor: pointer;">
-            📁 Importar JSON
-            <input type="file" id="file-input" accept=".json" style="display:none;" onchange="importarDicionario(event)">
-          </label>
+          
+          <div class="option-group">
+            <label class="option-btn" id="btn-upload" style="cursor: pointer;">
+              📎 Anexar Documento
+              <input type="file" id="file-upload-input" accept=".docx,.pdf" style="display:none;" onchange="processarArquivoAnexado(event)">
+            </label>
+            <span class="upload-info">Carrega e compacta arquivos PDF e DOCX</span>
+          </div>
+
+          <div class="option-group">
+            <label class="option-btn" id="btn-importar" style="cursor: pointer;">
+              📁 Importar Dicionário JSON
+              <input type="file" id="file-input" accept=".json" style="display:none;" onchange="importarDicionario(event)">
+            </label>
+            <span class="upload-info">Usa um dicionário pré-existente</span>
+          </div>
         </div>
       </div>
 
@@ -262,8 +289,8 @@
     <!-- Área de Texto -->
     <div class="editor-grid" id="editor-area">
       <div class="panel">
-        <label for="input-text">Texto Original (Cole aqui):</label>
-        <textarea id="input-text" placeholder="Cole o texto ou relatório aqui..."></textarea>
+        <label for="input-text">Texto Original (Cole ou Anexe um PDF/DOCX):</label>
+        <textarea id="input-text" placeholder="Cole o texto ou anexe um documento PDF ou DOCX aqui..."></textarea>
       </div>
 
       <div class="panel">
@@ -327,6 +354,55 @@
       processarTextoDinamico();
     }
 
+    // Leitor de documentos (Apenas DOCX e PDF)
+    async function processarArquivoAnexado(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const extensao = file.name.split('.').pop().toLowerCase();
+      
+      if (extensao !== 'docx' && extensao !== 'pdf') {
+        alert("Formato não suportado. Por favor, envie apenas arquivos PDF ou DOCX.");
+        return;
+      }
+
+      selecionarModo('gerar');
+
+      try {
+        if (extensao === 'docx') {
+          const reader = new FileReader();
+          reader.onload = async function(e) {
+            const arrayBuffer = e.target.result;
+            const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+            document.getElementById('input-text').value = result.value;
+            processarTextoDinamico();
+          };
+          reader.readAsArrayBuffer(file);
+        } 
+        else if (extensao === 'pdf') {
+          const reader = new FileReader();
+          reader.onload = async function(e) {
+            const typedarray = new Uint8Array(e.target.result);
+            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+            let textoCompleto = "";
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const textContent = await page.getTextContent();
+              const paginaTexto = textContent.items.map(item => item.str).join(' ');
+              textoCompleto += paginaTexto + "\n\n";
+            }
+
+            document.getElementById('input-text').value = textoCompleto;
+            processarTextoDinamico();
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      } catch (err) {
+        alert("Erro ao ler o documento: " + err.message);
+      }
+    }
+
     function importarDicionario(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -345,7 +421,7 @@
           processarTextoDinamico();
           alert("Dicionário " + file.name + " carregado com sucesso!");
         } catch(err) {
-          alert("Erro ao ler o arquivo JSON.");
+          alert("Erro ao ler o arquivo JSON do dicionário.");
         }
       };
       reader.readAsText(file);
