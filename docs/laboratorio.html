@@ -53,8 +53,8 @@
       margin-bottom: 20px;
     }
 
-    @media(min-width: 600px) {
-      .config-grid { grid-template-columns: 2fr 1fr; }
+    @media(min-width: 700px) {
+      .config-grid { grid-template-columns: 2.5fr 1fr; }
     }
 
     .box-config {
@@ -72,27 +72,32 @@
 
     .options-row {
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 10px;
+      flex-wrap: nowrap; /* Força ficarem na mesma linha */
       align-items: flex-start;
+      overflow-x: auto;
+      padding-bottom: 4px;
     }
 
     .option-group {
       display: flex;
       flex-direction: column;
       gap: 4px;
+      flex: 1;
+      min-width: 120px;
     }
 
     .option-btn {
       background: var(--bg);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 8px 12px;
+      padding: 8px 10px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       text-align: center;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .option-btn:hover, .option-btn.active {
@@ -102,10 +107,9 @@
     }
 
     .upload-info {
-      font-size: 0.73rem;
+      font-size: 0.68rem;
       color: var(--muted);
-      max-width: 180px;
-      line-height: 1.2;
+      line-height: 1.1;
     }
 
     /* Menu Gaveta de Fatiamento (Apenas Números) */
@@ -244,26 +248,29 @@
     </header>
 
     <div class="config-grid">
-      <!-- Origem do Dicionário + Botão Upload com Descrição Explicativa -->
+      <!-- Origem do Dicionário & Entrada (Três botões lado a lado) -->
       <div class="box-config">
         <h3>1. Origem do Dicionário & Entrada</h3>
         <div class="options-row">
-          <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">🔄 Gerar Automático</button>
+          <div class="option-group">
+            <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">🔄 Gerar Automático</button>
+            <span class="upload-info">Cria do próprio texto</span>
+          </div>
           
           <div class="option-group">
             <label class="option-btn" id="btn-upload" style="cursor: pointer;">
-              📎 Anexar Documento
+              📎 Anexar PDF/DOCX
               <input type="file" id="file-upload-input" accept=".docx,.pdf" style="display:none;" onchange="processarArquivoAnexado(event)">
             </label>
-            <span class="upload-info">Carrega e compacta arquivos PDF e DOCX</span>
+            <span class="upload-info">Lê direto do arquivo</span>
           </div>
 
           <div class="option-group">
             <label class="option-btn" id="btn-importar" style="cursor: pointer;">
-              📁 Importar Dicionário JSON
+              📁 Importar JSON
               <input type="file" id="file-input" accept=".json" style="display:none;" onchange="importarDicionario(event)">
             </label>
-            <span class="upload-info">Usa um dicionário pré-existente</span>
+            <span class="upload-info">Usa dicionário salvo</span>
           </div>
         </div>
       </div>
