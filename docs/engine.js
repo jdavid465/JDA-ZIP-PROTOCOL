@@ -23,7 +23,6 @@ function gerarChaveDicionario(indice) {
 
 // Gerador dinâmico baseado no tamanho do fatiamento (n)
 function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
-  // Limpa e divide o texto em palavras, mantendo pontuação separada ou focando em tokens limpos
   const palavras = texto.match(/\b[a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ]+\b/g) || [];
   const frequencias = {};
 
@@ -34,7 +33,6 @@ function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
       blocoArr.push(palavras[i + j]);
     }
     
-    // Ignora blocos compostos apenas por palavras muito curtas (ex: "de a", "e o")
     const termoCompleto = blocoArr.join(' ');
     if (tamanhoBloco === 1 && termoCompleto.length <= 2) continue;
 
@@ -65,13 +63,10 @@ function compactarJDAZIP(texto, dicionario = {}, tamanhoBloco = 1) {
   if (!texto) return { textoCompactado: "", dicionarioUtilizado: {} };
 
   let resultado = texto;
-
-  // Ordena as chaves do dicionário da maior para a menor string para evitar conflitos de substituição parcial
   const chavesOrdenadas = Object.keys(dicionario).sort((a, b) => b.length - a.length);
 
   for (const termoOriginal of chavesOrdenadas) {
     const codigo = dicionario[termoOriginal];
-    // Cria regex global case-insensitive para substituir o bloco exato de palavras
     const regex = new RegExp(termoOriginal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
     resultado = resultado.replace(regex, codigo);
   }
