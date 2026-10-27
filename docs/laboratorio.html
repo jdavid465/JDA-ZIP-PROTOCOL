@@ -86,7 +86,7 @@
       background: rgba(88, 166, 255, 0.05);
     }
 
-    /* Menu Gaveta de Fatiamento */
+    /* Menu Gaveta de Fatiamento (Apenas Números) */
     .dropdown {
       position: relative;
       display: inline-block;
@@ -222,11 +222,10 @@
     </header>
 
     <div class="config-grid">
-      <!-- Origem do Dicionário -->
+      <!-- Origem do Dicionário (Apenas Gerar e Importar) -->
       <div class="box-config">
         <h3>1. Origem do Dicionário</h3>
         <div class="options-row">
-          <button class="option-btn" id="btn-padrao" onclick="selecionarModo('padrao')">🟢 Padrão</button>
           <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">🔄 Gerar Automático</button>
           <label class="option-btn" id="btn-importar" style="cursor: pointer;">
             📁 Importar JSON
@@ -308,20 +307,11 @@
       processarTextoDinamico();
     }
 
-    async function selecionarModo(modo) {
+    function selecionarModo(modo) {
       modoSelecionado = modo;
       document.querySelectorAll('.box-config:first-child .option-btn').forEach(btn => btn.classList.remove('active'));
 
-      if (modo === 'padrao') {
-        document.getElementById('btn-padrao').classList.add('active');
-        try {
-          const res = await fetch('dictionary.json');
-          const data = await res.json();
-          dicionarioAtivo = data.mapeamentos || {};
-        } catch(e) {
-          dicionarioAtivo = {};
-        }
-      } else if (modo === 'gerar') {
+      if (modo === 'gerar') {
         document.getElementById('btn-gerar').classList.add('active');
         dicionarioAtivo = null;
       }
