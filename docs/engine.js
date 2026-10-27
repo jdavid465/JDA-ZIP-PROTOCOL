@@ -1,5 +1,5 @@
 /**
- * JDA-ZIP Engine v1.4 - Motor Blindado (Substituição Total e Rigorosa)
+ * JDA-ZIP Engine v1.5 - Compactação Total e Rigorosa
  * Roda 100% na memória RAM do navegador (Zero servidor)
  */
 
@@ -21,7 +21,7 @@ function gerarChaveDicionario(indice) {
 }
 
 function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
-  // Regex abrangente para capturar palavras em português (com acentos e cedilha)
+  // Captura palavras suportando acentuação e cedilha
   const palavras = texto.match(/[a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ]+/g) || [];
   const frequencias = {};
 
@@ -33,7 +33,7 @@ function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
     
     const termoCompleto = blocoArr.join(' ');
     
-    // Ignora termos muito curtos (menos de 4 caracteres) para blocos unitários
+    // Filtro inteligente: ignora apenas palavras unitárias menores que 4 letras para fatiamento 1
     if (tamanhoBloco === 1 && termoCompleto.length < 4) continue;
 
     const chaveTermo = termoCompleto.toLowerCase();
@@ -43,7 +43,7 @@ function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
   const dicionarioGerado = {};
   let indiceAtual = 0;
 
-  // Ordena por prioridade: blocos maiores e mais frequentes primeiro
+  // Ordena por prioridade (tamanho do termo multiplicado pela frequência)
   Object.keys(frequencias)
     .filter(termo => frequencias[termo] > 1)
     .sort((a, b) => (b.length * frequencias[b]) - (a.length * frequencias[a]))
@@ -63,17 +63,17 @@ function compactarJDAZIP(texto, dicionario = {}, tamanhoBloco = 1) {
 
   let resultado = texto;
   
-  // Ordena do maior termo para o menor para evitar substituições parciais sobrepostas
+  // Ordena do maior termo para o menor para garantir que blocos compostos substituam antes dos unitários
   const chavesOrdenadas = Object.keys(dicionario).sort((a, b) => b.length - a.length);
 
   for (const termoOriginal of chavesOrdenadas) {
     const codigo = dicionario[termoOriginal];
     
-    // Constrói regex robusta com limites de palavra (\b) suportando acentuação
+    // Regex blindada para encontrar todas as ocorrências exatas independentemente de maiúsculas/minúsculas
     const escapedTermo = termoOriginal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`(^|[^a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ])${escapedTermo}(?=[^a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ]|$)`, 'gi');
+    const regex = new RegExp(`\\b${escapedTermo}\\b`, 'gi');
     
-    resultado = resultado.replace(regex, (match, prefixo) => prefixo + codigo);
+    resultado = resultado.replace(regex, codigo);
   }
 
   return {
