@@ -13,7 +13,6 @@
       --accent: #58a6ff;
       --accent-hover: #1f6feb;
       --muted: #8b949e;
-      --green: #2ea043;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,36 +38,41 @@
     header h1 { font-size: 1.4rem; color: #fff; }
     a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
 
-    /* Painel de Modo de Dicionário */
-    .dict-selector {
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media(min-width: 600px) {
+      .config-grid { grid-template-columns: 2fr 1fr; }
+    }
+
+    .box-config {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 16px;
-      margin-bottom: 20px;
     }
 
-    .dict-selector h3 {
-      font-size: 1rem;
+    .box-config h3 {
+      font-size: 0.95rem;
       color: #fff;
       margin-bottom: 10px;
     }
 
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    @media(min-width: 600px) {
-      .options-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .options-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .option-btn {
       background: var(--bg);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 10px;
+      padding: 8px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.85rem;
@@ -82,20 +86,76 @@
       background: rgba(88, 166, 255, 0.05);
     }
 
-    /* Área de Edição Bloqueável */
+    /* Menu Gaveta de Fatiamento */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .dropbtn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dropbtn:hover { border-color: var(--accent); }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: var(--panel);
+      min-width: 100%;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      z-index: 10;
+      margin-top: 4px;
+    }
+
+    .dropdown-content button {
+      color: var(--text);
+      padding: 10px 14px;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .dropdown-content button:hover {
+      background: rgba(88, 166, 255, 0.1);
+      color: var(--accent);
+    }
+
+    .dropdown.show .dropdown-content { display: block; }
+
+    /* Área de Texto Bloqueável */
     .editor-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 16px;
       margin-bottom: 16px;
       opacity: 0.5;
-      pointer-events: none; /* Bloqueia antes da seleção */
+      pointer-events: none;
       transition: opacity 0.3s ease;
     }
 
     .editor-grid.unlocked {
       opacity: 1;
-      pointer-events: auto; /* Liberação */
+      pointer-events: auto;
     }
 
     .panel {
@@ -104,219 +164,4 @@
       border-radius: 8px;
       padding: 14px;
       display: flex;
-      flex-direction: column;
-    }
-
-    label { font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: var(--accent); }
-
-    textarea {
-      width: 100%;
-      height: 200px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      padding: 10px;
-      font-family: monospace;
-      font-size: 0.85rem;
-      resize: vertical;
-      outline: none;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .action-btn {
-      background: var(--accent-hover);
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      font-size: 0.9rem;
-    }
-
-    .action-btn:disabled {
-      background: var(--border);
-      cursor: not-allowed;
-    }
-
-    .stats {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      justify-content: space-around;
-      text-align: center;
-    }
-
-    .stat-value { font-size: 1.2rem; font-weight: bold; color: #fff; }
-    .stat-label { font-size: 0.75rem; color: var(--muted); }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <header>
-      <h1>Laboratório JDA-ZIP</h1>
-      <a href="index.html">&larr; Voltar à Central</a>
-    </header>
-
-    <!-- Passo 1: Configuração do Dicionário -->
-    <div class="dict-selector">
-      <h3>1. Selecione a Origem do Dicionário</h3>
-      <div class="options-grid">
-        <button class="option-btn" id="btn-padrao" onclick="selecionarModo('padrao')">
-          🟢 Usar Dicionário Padrão
-        </button>
-        <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">
-          🔄 Gerar Novo Automático
-        </button>
-        <label class="option-btn" id="btn-importar" style="display: block;">
-          📁 Importar JSON Local
-          <input type="file" id="file-input" accept=".json" style="display:none;" onchange="importarDicionario(event)">
-        </label>
-      </div>
-    </div>
-
-    <!-- Passo 2: Área de Texto (Desbloqueada após escolher o passo 1) -->
-    <div class="editor-grid" id="editor-area">
-      <div class="panel">
-        <label for="input-text">Texto Original (Cole aqui):</label>
-        <textarea id="input-text" placeholder="Cole o relatório ou texto que deseja compactar..."></textarea>
-      </div>
-
-      <div class="panel">
-        <label for="output-text">Prévia da Compactação (Temporário em RAM):</label>
-        <textarea id="output-text" readonly placeholder="A prévia aparecerá aqui..."></textarea>
-      </div>
-    </div>
-
-    <div class="controls">
-      <button class="action-btn" id="btn-compactar" disabled onclick="executarEExportar()">
-        💾 Compactar e Baixar Pacote (.txt + .json)
-      </button>
-    </div>
-
-    <div class="stats">
-      <div><span class="stat-value" id="orig-size">0 B</span><span class="stat-label">Original</span></div>
-      <div><span class="stat-value" id="comp-size">0 B</span><span class="stat-label">Compactado</span></div>
-      <div><span class="stat-value" id="ratio-val">0%</span><span class="stat-label">Redução</span></div>
-    </div>
-  </div>
-
-  <script src="engine.js"></script>
-  <script>
-    let modoSelecionado = null;
-    let dicionarioAtivo = {};
-
-    async function selecionarModo(modo) {
-      modoSelecionado = modo;
-
-      // Estilização dos botões
-      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
-
-      if (modo === 'padrao') {
-        document.getElementById('btn-padrao').classList.add('active');
-        try {
-          const res = await fetch('dictionary.json');
-          const data = await res.json();
-          dicionarioAtivo = data.mapeamentos || {};
-        } catch(e) {
-          dicionarioAtivo = {};
-        }
-      } else if (modo === 'gerar') {
-        document.getElementById('btn-gerar').classList.add('active');
-        dicionarioAtivo = null; // Será gerado na hora
-      }
-
-      desbloquearArea();
-    }
-
-    function importarDicionario(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const content = JSON.parse(e.target.result);
-          dicionarioAtivo = content.mapeamentos || content;
-          modoSelecionado = 'importado';
-          
-          document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
-          document.getElementById('btn-importar').classList.add('active');
-          
-          desbloquearArea();
-          alert("Dicionário " + file.name + " carregado com sucesso!");
-        } catch(err) {
-          alert("Erro ao ler o arquivo JSON.");
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function desbloquearArea() {
-      document.getElementById('editor-area').classList.add('unlocked');
-      document.getElementById('btn-compactar').removeAttribute('disabled');
-    }
-
-    // Atualiza a prévia visual temporária
-    document.getElementById('input-text').addEventListener('input', function() {
-      const texto = this.value;
-      let dictParaUso = dicionarioAtivo;
-
-      if (modoSelecionado === 'gerar') {
-        dictParaUso = gerarDicionarioDinamico(texto);
-      }
-
-      const res = compactarJDAZIP(texto, dictParaUso);
-      document.getElementById('output-text').value = res.textoCompactado;
-
-      const origBytes = new Blob([texto]).size;
-      const compBytes = new Blob([res.textoCompactado]).size;
-      const economia = origBytes > 0 ? (((origBytes - compBytes) / origBytes) * 100).toFixed(1) : 0;
-
-      document.getElementById('orig-size').innerText = origBytes + " B";
-      document.getElementById('comp-size').innerText = compBytes + " B";
-      document.getElementById('ratio-val').innerText = (economia > 0 ? "-" + economia : "0") + "%";
-    });
-
-    // Função que dispara o duplo download local
-    function executarEExportar() {
-      const textoOriginal = document.getElementById('input-text').value;
-      if (!textoOriginal) {
-        alert("Digite ou cole algum texto antes de compactar.");
-        return;
-      }
-
-      let dictFinal = dicionarioAtivo;
-      if (modoSelecionado === 'gerar') {
-        dictFinal = gerarDicionarioDinamico(textoOriginal);
-      }
-
-      const resultado = compactarJDAZIP(textoOriginal, dictFinal);
-
-      // 1. Baixa o Texto Compactado da RAM
-      baixarArquivoLocal(resultado.textoCompactado, 'texto_compactado.jda', 'text/plain');
-
-      // 2. Baixa o Dicionário utilizado em formato JSON
-      const jsonDict = JSON.stringify({
-        versao: "1.0",
-        geradoEm: new Date().toISOString(),
-        mapeamentos: dictFinal
-      }, null, 2);
-
-      setTimeout(() => {
-        baixarArquivoLocal(jsonDict, 'dicionario_sessao.json', 'application/json');
-      }, 300);
-    }
-  </script>
-</body>
-</html>
+      flex-direction:
