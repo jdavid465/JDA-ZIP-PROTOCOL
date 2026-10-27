@@ -80,10 +80,16 @@
       transition: all 0.2s;
     }
 
-    .option-btn:hover, .option-btn.active {
+    .option-btn:hover:not(:disabled), .option-btn.active {
       border-color: var(--accent);
       color: var(--accent);
       background: rgba(88, 166, 255, 0.05);
+    }
+
+    .option-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: var(--border);
     }
 
     /* Menu Gaveta de Fatiamento (Apenas Números) */
@@ -222,11 +228,12 @@
     </header>
 
     <div class="config-grid">
-      <!-- Origem do Dicionário (Apenas Gerar e Importar) -->
+      <!-- Origem do Dicionário + Botão Upload Desativado -->
       <div class="box-config">
         <h3>1. Origem do Dicionário</h3>
         <div class="options-row">
           <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">🔄 Gerar Automático</button>
+          <button class="option-btn" id="btn-upload" disabled title="Em breve">📎 Anexar Arquivo (Em breve)</button>
           <label class="option-btn" id="btn-importar" style="cursor: pointer;">
             📁 Importar JSON
             <input type="file" id="file-input" accept=".json" style="display:none;" onchange="importarDicionario(event)">
@@ -390,7 +397,7 @@
       baixarArquivoLocal(resultado.textoCompactado, 'texto_compactado.jda', 'text/plain');
 
       const jsonDict = JSON.stringify({
-        versao: "1.2",
+        versao: "1.4",
         fatiamento: tamanhoFatiamento,
         geradoEm: new Date().toISOString(),
         mapeamentos: dictFinal
