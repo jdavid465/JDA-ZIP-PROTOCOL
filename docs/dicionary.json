@@ -1,8 +1,10 @@
 {
   "versao": "1.0",
+  "tipo": "padrao",
   "mapeamentos": {
     "proteínas totais": "~JZ0001;",
-    "Perfil": "~JZ0002;",
-    "hemograma": "~JZ0004;"
+    "creatinina": "~JZ0002;",
+    "hemograma": "~JZ0003;",
+    "colesterol": "~JZ0004;"
   }
 }
