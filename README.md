@@ -1,125 +1,265 @@
-<div align="center">
-  
 # 🚀 JDA-ZIP Protocol
 
-### **An Agnostic, Lightweight Protocol Proposal for LLM Context Traffic**
-### *Proposta de protocolo leve e agnóstico para tráfego de contexto em LLMs*
+### **A Simple Idea to Shorten Repeated Text Sent to AIs (Under Testing)**
 
-<p align="center">
-  <b>EN</b> | <a href="#-o-problema-real--the-real-world-problem"><b>PT</b></a>
-</p>
+### *Uma ideia simples para encurtar textos repetidos enviados a IAs (em fase de testes)*
 
----
-
-</div>
+&nbsp;
 
 > [!NOTE]
-> **EN:** I am not a senior software engineer and I don't know how to code this architecture yet, but I have a highly logical mindset. Noticing the massive infrastructure bottlenecks we face in technology today, I developed this conceptual system design and used AI to help me refine the technical layout. Welcome to the **JDA-ZIP Protocol**.
+> **EN:** This is an **experiment**. There is a small prototype and **no measured results yet**. I do not know if the idea really helps, so I am asking the community to test it and to criticize it.
 >
-> **PT:** *Não sou engenheiro de software sênior e não sei programar essa arquitetura, mas tenho uma mente muito lógica. Percebendo os gargalos gigantescos que temos hoje na tecnologia, desenvolvi um conceito de infraestrutura e contei com a ajuda da IA para lapidar o formato técnico. Bem-vindo ao **JDA-ZIP Protocol**.*
+> **PT:** *Este é um **experimento**. Existe um protótipo pequeno e **nenhum resultado medido ainda**. Eu não sei se a ideia ajuda de verdade, por isso peço à comunidade que teste e critique.*
 
----
+* * *
 
 ## 🛠️ The Journey / A Trajetória
 
-**EN:** *This protocol didn't come out of nowhere; it was refined over three days of intense logical brainstorming:*
-- **The Spark (Origin):** It started when trying to copy long conversation histories between different AIs so they could share context. The system clipboard kept truncating the text due to memory limits, and target AIs struggled with token limits. The question arose: why carry heavy raw text across RAM and connections when we can transport a lightweight semantic pointer instead?
-- **Day 1 — Core Compression:** Conceptualized the base logic of removing text weight using consonant skeletons and local dictionaries.
-- **Day 2 — Modular Expansion:** Realized that all digital files are structured data, expanding JDA-ZIP into a modular "plug-and-play" architecture with core services and specialized plugins (PDF, Images, etc.).
-- **Day 3 — Market Context & Purpose:** Refined the core argument against standard "it already exists" claims, focusing on JDA-ZIP's unique mission: solving modern AI token costs, RAM bottlenecks, and cross-platform context retention.
+**EN:** I am not a professional programmer. It started when I tried to copy long conversations from one AI to another to compare answers, and the pasted text came out at less than half of what I copied. I wondered: why carry all that heavy text if repeated words and phrases could be swapped for short codes, using a "dictionary" that both sides already know?
 
-**PT:** *Este protocolo não surgiu do nada; ele foi lapidado ao longo de três dias de intenso raciocínio lógico:*
-- **A Faísca (Origem):** *Tudo começou ao tentar copiar textos e históricos longos de uma IA para outra para manter o contexto, percebendo que o sistema cortava o conteúdo pela metade por limite de memória. O JDA-ZIP nasceu da pergunta: por que carregar o texto bruto pesado na RAM e nas conexões se podemos transportar apenas um ponteiro semântico leve entre as IAs?*
-- **Dia 1 — Compactação Base:** Conceituação da lógica inicial para reduzir peso de texto usando esqueletos consonantais e dicionários locais.
-- **Dia 2 — Expansão Modular:** Percepção de que todo arquivo digital é dado estruturado, expandindo o JDA-ZIP para uma arquitetura modular "plug-and-play" com núcleo simples e plugins específicos (PDF, Imagens, etc.).
-- **Dia 3 — Propósito e Contexto:** Refinamento dos argumentos contra o clássico "isso já existe", focando na verdadeira missão do JDA-ZIP: resolver gargalos modernos de RAM, custo de tokens e retenção de contexto entre IAs.
+**PT:** *Eu não sou programador profissional. Tudo começou quando tentei copiar conversas longas de uma IA para outra, para comparar respostas, e o texto colado vinha com menos da metade do que eu copiei. Pensei: por que carregar todo esse texto pesado se palavras e frases repetidas podem ser trocadas por códigos curtos, usando um "dicionário" que os dois lados já conhecem?*
 
----
+* * *
 
-## 🛑 The Real-World Problem / O Problema Real
+## 🛑 The Problem / O Problema
 
-### **EN**
-Today, Artificial Intelligence has two massive bottlenecks: **network bandwidth hunger** and **RAM hunger**.
-- Every time you interact with an AI or send data to it, the system must load and process entire texts, word by word, over and over again. This text translation generates an enormous volume of **Tokens** (the sub-word units that AI providers like OpenAI and Google use to meter and bill API traffic). This "context hunger" makes long chat histories and large datasets exponentially expensive for enterprises.
-- As conversations or datasets grow, servers and smartphones must hold gigabytes of active text files in RAM. This causes latency, crashes applications, and costs companies billions of dollars in cloud infrastructure.
-- Current AI architecture suffers from "amnesia": when a device's RAM fills up with text, the system simply deletes the beginning of the conversation history to make room.
+**EN:** AIs do not count letters, they count **tokens** (small pieces of words). More tokens means more cost, more waiting time and more memory used. On slow networks, more bytes also means a slower connection.
 
-### **PT**
-*Hoje, a Inteligência Artificial tem duas grandes "fomes": **fome de internet** e **fome de Memória RAM**.*
-- *Toda vez que você conversa com uma IA ou envia dados para ela, o sistema precisa carregar e ler textos inteiros, palavra por palavra, repetidamente. Essa tradução de texto gera um volume enorme de **Tokens** (os fragmentos de palavras que provedores de IA, como OpenAI e Google, usam para medir e faturar o tráfego de API). Essa "fome de contexto" torna históricos longos e grandes volumes de dados exponencialmente caros para as empresas.*
-- *Se a conversa fica longa, os servidores e os celulares precisam segurar gigabytes de arquivos abertos na memória RAM. Isso deixa os sistemas lentos, faz os aplicativos travarem e custa bilhões de dólares em tráfego de internet para as empresas.*
-- *A IA atual sofre de "amnésia": quando a memória RAM do aparelho enche de texto, o sistema simplesmente apaga o início da conversa.*
+**PT:** *As IAs não contam letras, elas contam **tokens** (pedacinhos de palavras). Mais tokens significam mais custo, mais espera e mais memória usada. Em redes lentas, mais bytes também significam uma conexão mais demorada.*
 
----
+| Texto / Text | Tokens (estimativa em português) |
+|:--|:--:|
+| 10 palavras | 15 a 20 |
+| 1.000 palavras (cerca de 2 páginas) | 1.500 a 2.000 |
+| 10.000 palavras | 15.000 a 20.000 |
 
-## 💡 How It Works / Como Funciona
+*Valores aproximados. O número exato depende do modelo e do texto. / Approximate values. The exact number depends on the model and the text.*
 
-### ⚡ How JDA-ZIP differs from existing solutions / Como o JDA-ZIP se diferencia das soluções existentes
+* * *
 
-**EN:** Unlike traditional text compression tools or AI-driven token pruning:
+## 💡 The Idea / A Ideia
 
-* **Unlike Gzip / ZIP (Byte-level Compression):** Traditional compression operates on raw bytes without understanding data structure, intent, or semantic meaning.
-* **Unlike LLMLingua / Token Pruning (Lossy Pruning):** JDA-ZIP doesn't discard words or guess meaning through estimations. The original context is preserved and reconstructed 100% deterministically.
-* **Lightweight for Edge & Mobile:** Compression and mapping rely on lightweight local dictionaries, eliminating the need for heavy compute or GPUs on your smartphone or edge device.
+**EN:** JDA-ZIP Protocol has two parts that can be used together or separately.
 
-**PT:** Ao contrário das ferramentas tradicionais de compressão de texto ou de poda por IA:
+**PT:** *O JDA-ZIP Protocol tem duas partes, que podem ser usadas juntas ou separadas.*
 
-* **Diferente do Gzip / ZIP (Compressão por Bytes):** A compressão tradicional opera em nível de bytes brutos e não compreende a estrutura, a intenção ou o significado semântico dos dados.
-* **Diferente do LLMLingua / Token Pruning (Poda com Perdas):** O JDA-ZIP não descarta palavras nem tenta adivinhar o significado do texto através de estimativas. O contexto original é preservado e reconstruído de forma 100% determinística.
-* **Leve para Edge & Dispositivos Móveis:** A compressão e o mapeamento acontecem por meio de dicionários locais extremamente leves, descartando a necessidade de processamento pesado ou GPUs no seu smartphone ou dispositivo edge.
+&nbsp;
 
-**EN:** The **JDA-ZIP Protocol** is an intelligent method for **semantic communication**. Instead of focusing on letters and syntax, it focuses entirely on the *meaning* of the message. The protocol operates through two main modules:
+### 📖 Part 1: Code Dictionary / Parte 1: Dicionário de Códigos
 
-**PT:** *O **JDA-ZIP Protocol** é um método inteligente de **comunicação semântica**. Em vez de focar nas letras e sintaxe, ele foca inteiramente no sentido da mensagem. O protocolo funciona em dois módulos principais:*
+**EN:** Both sides agree on a dictionary. The sender writes a short code, and the receiver expands it back to the full text.
 
-### 🛠️ Module 1: Ultra-Lightweight Transmission (Network & Token Savings)
-*Módulo 1: Transmissão Ultra-Leve (Economia de Internet e Tokens)*
+**PT:** *Os dois lados combinam um dicionário. Quem envia escreve um código curto, e quem recebe expande de volta para o texto completo.*
 
-- **EN:** Imagine that both ends of the connection (your smartphone and the AI server) have the exact same "Code Dictionary" pre-installed locally. On the sending end, an AI reads your long text and replaces entire ideas and contexts with ultra-short numerical codes, heavily reducing the token count before hitting the API. On the receiving end, the AI checks its identical local dictionary and perfectly reconstructs the original meaning without any data loss.
-- **PT:** *Imagine que as duas pontas da conversa (o seu celular e o servidor da IA) possuem exatamente o mesmo "Dicionário de Códigos" instalado localmente. A IA na ponta de envio lê o seu texto longo e substitui ideias e contextos inteiros por códigos numéricos curtíssimos, reduzindo drasticamente a contagem de tokens enviados à API. Na ponta de recepção, a IA do outro lado recebe apenas esses pequenos números, consulta o dicionário idêntico e reconstrói o sentido original perfeitamente, sem perdas.*
+```
+Dicionário / Dictionary
+  $SYS_1   =  "You are an expert veterinary assistant and diagnostic specialist."
+  $OUT_JSON =  "Return the response strictly in valid JSON format with keys status, data, and message."
 
-### 🧠 Module 2: The Local Anchor System (RAM Savings)
-*Módulo 2: O Sistema de Âncoras Locais (Economia de Memória RAM)*
+Enviado / Sent:     $SYS_1 Por favor, analisa o seguinte exame de sangue. $OUT_JSON
+```
 
-- **EN:** To avoid the constant back-and-forth shuffling of heavy data in the device's memory, the protocol introduces **Semantic Anchors**. Instead of keeping massive text chains active in RAM, JDA-ZIP leaves the heavy content resting in storage. In RAM, it runs only a tiny "anchor" (a lightweight logical pointer). When the AI needs context, it reads the anchor, performs a precise "jump" directly to the exact dataset, and processes the meaning instantly.
-- **PT:** *Para evitar o vai e vem de dados na memória do aparelho, o protocolo usa **Âncoras Semânticas**. Em vez de carregar o texto inteiro na memória RAM o tempo todo, o JDA-ZIP deixa o conteúdo pesado descansando em um canto. Na RAM, ele roda apenas uma "âncora" (um link lógico super leve). Quando a IA precisa entender o contexto, ela lê a âncora, dá um "salto" cirúrgico direto para o dado exato e processa o sentido instantaneamente.*
+&nbsp;
 
----
+**⚖️ When is it worth it? / Quando vale a pena?**
 
-## 🎯 Use Cases / Casos de Uso
+**EN:** A code only saves something if the original text is **long or rare** and **repeats many times**. The dictionary itself also costs something to send once.
 
-| # | Use Case / Caso de Uso | Benefit / Benefício |
-| :---: | :--- | :--- |
-| **1** | **AI App Syncing**<br>*Sincronização de Apps de IA* | **EN:** Eliminates sync latency and mobile data usage by sending only raw numerical anchors instead of heavy raw chat histories.<br>**PT:** *Elimina o atraso de sincronização e o uso de dados móveis ao enviar apenas âncoras numéricas em vez de históricos de chat pesados.* |
-| **2** | **Edge AI on Budget Phones**<br>*IAs Locais em Celulares Baratos* | **EN:** Allows budget devices to maintain massive AI conversation contexts without RAM exhaustion or overheating.<br>**PT:** *Permite que aparelhos de entrada mantenham contextos gigantescos de conversa com IA sem estourar a memória RAM ou esquentar o dispositivo.* |
-| **3** | **Smart Agriculture**<br>*Monitoramento no Agronegócio* | **EN:** Compresses field telemetry into tiny codes, allowing sensors to stream vital data over weak rural/satellite connections.<br>**PT:** *Compacta a telemetria do campo em códigos minúsculos, permitindo que sensores transmitam dados vitais mesmo em conexões rurais ou de satélite fracas.* |
-| **4** | **Enterprise Infrastructure**<br>*Redução de Custo Corporativo* | **EN:** Drastically cuts enterprise API billing by optimizing token consumption, shrinking network cloud traffic volume by up to 90% [r/systemdesign].<br>**PT:** *Corta drasticamente as faturas de API das empresas ao otimizar o consumo de tokens, reduzindo o volume de tráfego de dados em nuvem em até 90% [r/systemdesign].* |
+**PT:** *Um código só economiza se o texto original for **longo ou raro** e se **repetir várias vezes**. O próprio dicionário também custa algo para ser enviado uma vez.*
 
----
+| Vezes que a palavra aparece | Por extenso | Com código + legenda |
+|:--:|:--:|:--:|
+| 1 | ~5 tokens | ~12 tokens (pior) |
+| 20 | ~100 tokens | ~50 tokens |
 
-## 💡 The Real-World Test / O Teste na Vida Real
+*Exemplo ilustrativo com a palavra "inconstitucionalmente". Os números são aproximados e precisam ser medidos com o seu modelo.*
 
-**EN:** Funny enough, right before finishing this documentation, my browser window started lagging and crashed because of heavy text history loading—the exact "RAM hunger" problem that the JDA-ZIP Protocol aims to solve! If this system were active, it wouldn't be storing gigabytes of dead text in active memory. Proof that we live the problems we try to fix.
+&nbsp;
 
-**PT:** *Curiosamente, logo antes de terminar esta documentação, a minha janela do navegador começou a travar e ficou lenta por causa do excesso de histórico de texto carregado — exatamente o problema de "fome de RAM" que o JDA-ZIP Protocol busca resolver! Se este sistema estivesse ativo, ele não estaria guardando gigabytes de texto morto na memória ativa. Prova de que a gente vive na pele os problemas que tenta resolver.*
+**📍 Where does the dictionary live? / Onde o dicionário fica?**
 
----
+Isto decide se a ideia economiza **tokens** ou apenas **rede**.
 
-## 🌍 Vision & Community Discussion / Visão e Debate
+| Onde fica o dicionário | Economiza rede? | Economiza tokens? | Observação |
+|:--|:--:|:--:|:--|
+| Num **programa**, fora da IA | ✅ Sim | ❌ Não | O programa expande antes da IA ler, então a IA lê o texto completo. |
+| No **início do prompt** (de preferência em cache) | ✅ Sim | ✅ Sim, depois da 1ª vez | A IA entende os códigos pela legenda. Pode errar. |
+| **Dentro do modelo** (treinado, ou com vocabulário ampliado) | ✅ Sim | ✅ Sim | Só em modelos que você controla, como os de pesos abertos. Exige treino. |
+
+&nbsp;
+
+### ⚓ Part 2: Local Anchors / Parte 2: Âncoras Locais
+
+**EN:** Instead of keeping a whole long text inside the AI's context, we keep the text stored (in a file) and leave only a tiny **anchor** in the context. The anchor says what the content is about and where it is.
+
+**PT:** *Em vez de manter um texto longo inteiro dentro do contexto da IA, guardamos o texto salvo (em um arquivo) e deixamos no contexto só uma **âncora** bem pequena. A âncora diz sobre o que é o conteúdo e onde ele está.*
+
+| Campo / Field | Exemplo / Example |
+|:--|:--|
+| 🔖 ID da âncora | `@A12` |
+| 📁 Local do arquivo | `notas/reuniao-03.md` |
+| 🏷️ Assunto | orçamento de 2026 |
+| 📚 Base de referência | `planilha_custos.xlsx` |
+
+O que a IA vê no contexto / What the AI sees in context:
+
+```
+@A12  orçamento de 2026 (reunião 03)
+```
+
+**EN:** The AI does not "jump" to the file by itself. A **program around the AI** does the search: when the AI needs the details of `@A12`, the program loads only that snippet into the conversation, and removes it afterwards.
+
+**PT:** *A IA não "salta" sozinha até o arquivo. Quem faz a busca é um **programa em volta da IA**: quando a IA precisa dos detalhes de `@A12`, o programa carrega só aquele trecho na conversa e o retira depois.*
 
 > [!TIP]
-> **EN:** My vision is for JDA-ZIP to be **agnostic, universal, and complementary**. It is not designed to replace any existing technology or pipeline, but rather to serve as a lightweight ally to modern AI infrastructure. Whether you code in Python or JavaScript, or use OpenAI, Google, or open-source models, any system should be able to plug into this protocol.
->
-> **PT:** *A minha visão é que o JDA-ZIP seja **agnóstico, universal e complementar**. Ele não nasce para substituir nenhuma tecnologia ou pipeline existente, mas sim para atuar como um aliado leve da infraestrutura moderna de IA. Não importa se você programa em Python ou JavaScript, ou se usa modelos da OpenAI, Google ou código aberto: qualquer sistema deve ser capaz de se plugar a este protocolo.*
+> **Ideia:** guardar também uma data ou um código de versão na âncora, para saber se o arquivo mudou desde que ela foi criada.
 
-### 💬 Let's Connect! / Vamos Debater!
+* * *
 
-**EN:** Conceived and designed by *Jonathan D. Andrade* **(jdavid465)** as an open conceptual architecture proposal. I am bringing the mental blueprint—now I invite developers, engineers, and researchers to join the conversation: How do you visualize building the code for this dictionary and anchor structure? Feel free to open an **Issue** or start a **Discussion**!
+## 🔄 Flow / Fluxo
 
-**PT:** *Concebido e projetado por *Jonathan D. Andrade* **(jdavid465)** como uma proposta conceitual de arquitetura aberta. Trago o modelo de arquitetura mental e agora convido desenvolvedores, engenheiros e pesquisadores a debaterem juntos: Como vocês visualizam a criação do código para essa estrutura de dicionários e âncoras? Fique à vontade para abrir uma **Issue** ou iniciar uma **Discussão**!*
+```
+  Texto longo / Long text
+          │
+          ▼
+  ┌───────────────────────────┐
+  │ 1. Dicionário             │  frases repetidas  →  códigos curtos
+  └───────────────────────────┘
+          │
+          ▼
+  ┌───────────────────────────┐
+  │ 2. Âncoras                │  conteúdo grande  →  salvo em arquivo
+  │                           │  no contexto: só ID + assunto + local
+  └───────────────────────────┘
+          │
+          ▼
+  Mensagem curta / Short message  ──►  IA
+          │
+          ▼  (se precisar de detalhes / if details are needed)
+  Programa busca o trecho exato  ──►  entra na conversa só quando necessário
+```
 
----
+* * *
 
-<div align="center">
-  <img src="https://visitor-badge.laobi.icu/badge?page_id=jdavid465.JDA-ZIP-PROTOCOL" alt="Visitors Count" />
-</div>
+## ✅ What Works Today / O Que Funciona Hoje
+
+| Item | Estado |
+|:--|:--|
+| Troca de frases **exatamente iguais** às do dicionário e volta ao original (`jda_zip.py`) | ✅ Funciona no protótipo |
+| Dicionário no início do prompt, com cache | 🔬 Ideia, **não testada** |
+| Modelo treinado (ou vocabulário ampliado) para entender os códigos | 🔬 Ideia, **não testada** |
+| Âncoras com local do arquivo e assunto | 🔬 Conceito, **sem código ainda** |
+| Uma IA escolhendo os códigos sozinha ("parte semântica") | ❌ **Não existe**. É só uma possibilidade futura. |
+| Proteção contra o usuário digitar um código no texto (ex.: `$OUT_JSON`) | ⚠️ **Falha conhecida**: o código seria trocado sem querer. |
+
+&nbsp;
+
+> [!WARNING]
+> **Honestidade / Honesty**
+> - Não medi quanto isso economiza. Não existe número confirmado neste projeto.
+> - Se o texto é expandido **antes** de chegar na IA, os **tokens cobrados não diminuem**. Diminui só o que viaja pela internet.
+> - Trocar **cada palavra** por 1 ou 2 caracteres **não reduz tokens**: o modelo já usa um vocabulário interno que faz isso, e códigos estranhos costumam ser quebrados em vários pedaços.
+> - Âncoras podem trazer o trecho errado ou deixar passar algo importante. É preciso medir se a qualidade das respostas cai.
+
+* * *
+
+## 🎯 Where It Might Help / Onde Pode Ajudar
+
+> Todas as linhas abaixo são **hipóteses a testar**, não resultados.
+
+| # | Caso de uso | Por que pode ajudar | Onde provavelmente **não** ajuda |
+|:-:|:--|:--|:--|
+| 1 | **Agentes e apps de IA que repetem as mesmas instruções** | O dicionário encurta o que se repete toda hora. | Textos sem repetição. |
+| 2 | **IAs locais em aparelhos com pouca memória** | Âncoras mantêm menos texto ativo na conversa. | Se o aparelho já tem memória de sobra. |
+| 3 | **Conexões ruins (rural, satélite)** | Menos bytes a enviar para textos repetitivos. | Dados de sensores em números: formatos binários e compressores já fazem melhor. |
+| 4 | **Levar contexto de uma IA para outra** | Âncoras e resumos organizados no lugar de colar tudo. | Quando o problema é só o limite da caixa de colar do site: salvar em arquivo `.txt` já resolve. |
+
+* * *
+
+## 🔎 Similar Things That Already Exist / Coisas Parecidas Que Já Existem
+
+**EN:** This idea is not new, and I want that to be clear.
+
+**PT:** *Esta ideia não é nova, e quero deixar isso claro.*
+
+| O que já existe | O que faz |
+|:--|:--|
+| **Cache de prompt** (oferecido por alguns serviços de IA) | Cobra menos por textos que se repetem. |
+| **zstd / Brotli** | Compressão de bytes com dicionário compartilhado. |
+| **LLMLingua** | Corta partes do texto para encurtar, mas perde informação. |
+| **SemanticZip** e outros estudos | Dicionários compartilhados entre IAs. |
+| **RAG e memória externa** (como MemGPT) | Guardam o histórico fora e trazem só os trechos necessários. |
+
+**EN:** JDA-ZIP Protocol does not try to replace any of these. The question is: **is there a case where a simple, versioned dictionary plus anchors helps?** The answer may be "no", and that is also a useful result.
+
+**PT:** *O JDA-ZIP Protocol não tenta substituir nenhuma delas. A pergunta é: **existe algum caso em que um dicionário simples e versionado, junto com âncoras, ajuda?** A resposta pode ser "não", e isso também é um resultado útil.*
+
+* * *
+
+## 🧪 How You Can Help / Como Você Pode Ajudar
+
+**EN:** I need tests and criticism. Open questions:
+
+**PT:** *Preciso de testes e de críticas. As perguntas abertas são:*
+
+1. Quantos **tokens** isso economiza de verdade?
+2. Isso ganha do **cache de prompt**, ou não faz diferença?
+3. A IA **entende bem os códigos** quando recebe o dicionário no início?
+4. Num modelo local, melhora a **velocidade** e o uso de **memória**?
+5. Com âncoras, a **qualidade das respostas** se mantém em comparação com o contexto completo?
+
+&nbsp;
+
+### 🧰 Simple test / Teste simples
+
+1. Escolha um texto longo que você repete muito (por exemplo, instruções fixas).
+2. Conte os tokens com o contador do serviço que você usa.
+3. Troque as partes repetidas por códigos (com a legenda) e conte de novo.
+4. Mande para a IA e veja se a resposta continua boa.
+5. Se puder, repita com o cache do serviço ligado e compare.
+
+&nbsp;
+
+### 📝 How to report / Como relatar
+
+Abra uma **Issue** com:
+
+| Informação | Exemplo |
+|:--|:--|
+| Serviço e modelo | (nome do serviço e do modelo) |
+| Tokens antes e depois | 1.800 → 1.100 |
+| Cache ligado? | Sim / Não |
+| Tempo e memória (se for modelo local) | (opcional) |
+| A resposta ficou igual, pior ou melhor? | Igual |
+| Observações | (livre) |
+
+> [!WARNING]
+> **Não publique dados pessoais ou confidenciais** nos seus testes.
+
+* * *
+
+## 🌍 Vision / Visão
+
+**EN:** I would like JDA-ZIP Protocol to be **simple, open and complementary**: a small layer that works together with caches, memory systems and compressors, and not something that replaces them.
+
+**PT:** *Eu gostaria que o JDA-ZIP Protocol fosse **simples, aberto e complementar**: uma camada pequena que trabalha junto com caches, sistemas de memória e compressores, e não algo que os substitui.*
+
+* * *
+
+## 💬 Let's Talk / Vamos Conversar
+
+**EN:** Criticism is welcome. If you think this does not work, please open an **Issue** or a **Discussion** and explain why. Code, tests and corrections are welcome too.
+
+**PT:** *Críticas são bem-vindas. Se você acha que isso não funciona, abra uma **Issue** ou uma **Discussão** explicando o motivo. Código, testes e correções também são bem-vindos.*
+
+* * *
+
+## 📄 License / Licença
+
+GPL-3.0
+
+&nbsp;
+
+Created by **Jonathan D. Andrade** ([jdavid465](https://github.com/jdavid465)) as an open experiment.
+
+*Criado por **Jonathan D. Andrade** ([jdavid465](https://github.com/jdavid465)) como um experimento aberto.*
