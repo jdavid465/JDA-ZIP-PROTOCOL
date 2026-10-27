@@ -1,5 +1,5 @@
 /**
- * JDA-ZIP Engine v1.5 - Compactação Total e Rigorosa
+ * JDA-ZIP Engine v1.7 - Fatiamento Exato por Grupos de Palavras (N-gram)
  * Roda 100% na memória RAM do navegador (Zero servidor)
  */
 
@@ -21,10 +21,11 @@ function gerarChaveDicionario(indice) {
 }
 
 function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
-  // Captura palavras suportando acentuação e cedilha
+  // Extrai todas as palavras do texto mantendo a ordem sequencial
   const palavras = texto.match(/[a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ]+/g) || [];
   const frequencias = {};
 
+  // Varre o texto agrupando exatamente de N em N palavras (n-grams)
   for (let i = 0; i <= palavras.length - tamanhoBloco; i++) {
     const blocoArr = [];
     for (let j = 0; j < tamanhoBloco; j++) {
@@ -32,21 +33,18 @@ function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
     }
     
     const termoCompleto = blocoArr.join(' ');
-    
-    // Filtro inteligente: ignora apenas palavras unitárias menores que 4 letras para fatiamento 1
-    if (tamanhoBloco === 1 && termoCompleto.length < 4) continue;
-
     const chaveTermo = termoCompleto.toLowerCase();
+    
     frequencias[chaveTermo] = (frequencias[chaveTermo] || 0) + 1;
   }
 
   const dicionarioGerado = {};
   let indiceAtual = 0;
 
-  // Ordena por prioridade (tamanho do termo multiplicado pela frequência)
+  // Ordena prioritariamente pelos blocos que mais se repetem (frequência)
   Object.keys(frequencias)
-    .filter(termo => frequencias[termo] > 1)
-    .sort((a, b) => (b.length * frequencias[b]) - (a.length * frequencias[a]))
+    .filter(termo => frequencias[termo] > 1) // Apenas termos repetidos
+    .sort((a, b) => frequencias[b] - frequencias[a])
     .forEach(termo => {
       const token = gerarChaveDicionario(indiceAtual);
       if (token) {
@@ -63,15 +61,17 @@ function compactarJDAZIP(texto, dicionario = {}, tamanhoBloco = 1) {
 
   let resultado = texto;
   
-  // Ordena do maior termo para o menor para garantir que blocos compostos substituam antes dos unitários
-  const chavesOrdenadas = Object.keys(dicionario).sort((a, b) => b.length - a.length);
+  // Ordena do maior grupo de palavras para o menor para evitar conflitos de substituição
+  const chavesOrdenadas = Object.keys(dicionario).sort((a, b) => b.split(' ').length - a.split(' ').length);
 
   for (const termoOriginal of chavesOrdenadas) {
     const codigo = dicionario[termoOriginal];
     
-    // Regex blindada para encontrar todas as ocorrências exatas independentemente de maiúsculas/minúsculas
+    // Constrói a regex exata para substituir o grupo de palavras preservando espaçamentos e maiúsculas/minúsculas
     const escapedTermo = termoOriginal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`\\b${escapedTermo}\\b`, 'gi');
+    // Cria uma regex que respeita espaços entre as palavras do grupo
+    const regexPattern = escapedTermo.replace(/\s+/g, '\\s+');
+    const regex = new RegExp(regexPattern, 'gi');
     
     resultado = resultado.replace(regex, codigo);
   }
