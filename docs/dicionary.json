@@ -1,0 +1,8 @@
+{
+  "versao": "1.0",
+  "mapeamentos": {
+    "proteínas totais": "~JZ0001;",
+    "Perfil": "~JZ0002;",
+    "hemograma": "~JZ0004;"
+  }
+}
