@@ -1,5 +1,5 @@
 /**
- * JDA-ZIP Engine v1.3 - Motor Blindado com Delimitadores e Filtro de Tamanho
+ * JDA-ZIP Engine v1.4 - Motor Blindado (Substituição Total e Rigorosa)
  * Roda 100% na memória RAM do navegador (Zero servidor)
  */
 
@@ -21,7 +21,8 @@ function gerarChaveDicionario(indice) {
 }
 
 function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
-  const palavras = texto.match(/\b[a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ]+\b/g) || [];
+  // Regex abrangente para capturar palavras em português (com acentos e cedilha)
+  const palavras = texto.match(/[a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ]+/g) || [];
   const frequencias = {};
 
   for (let i = 0; i <= palavras.length - tamanhoBloco; i++) {
@@ -32,9 +33,8 @@ function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
     
     const termoCompleto = blocoArr.join(' ');
     
-    // FILTRO DE SEGURANÇA: Ignora blocos muito curtos (menos de 4 caracteres no total)
-    // Isso evita trocar palavras inúteis como "de", "em", "um" que incham o arquivo.
-    if (termoCompleto.length < 4) continue;
+    // Ignora termos muito curtos (menos de 4 caracteres) para blocos unitários
+    if (tamanhoBloco === 1 && termoCompleto.length < 4) continue;
 
     const chaveTermo = termoCompleto.toLowerCase();
     frequencias[chaveTermo] = (frequencias[chaveTermo] || 0) + 1;
@@ -43,9 +43,10 @@ function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
   const dicionarioGerado = {};
   let indiceAtual = 0;
 
+  // Ordena por prioridade: blocos maiores e mais frequentes primeiro
   Object.keys(frequencias)
     .filter(termo => frequencias[termo] > 1)
-    .sort((a, b) => frequencias[b].length * frequencias[b] - frequencias[a].length * frequencias[a]) // Prioriza termos maiores e mais frequentes
+    .sort((a, b) => (b.length * frequencias[b]) - (a.length * frequencias[a]))
     .forEach(termo => {
       const token = gerarChaveDicionario(indiceAtual);
       if (token) {
@@ -61,16 +62,18 @@ function compactarJDAZIP(texto, dicionario = {}, tamanhoBloco = 1) {
   if (!texto) return { textoCompactado: "", dicionarioUtilizado: {} };
 
   let resultado = texto;
+  
+  // Ordena do maior termo para o menor para evitar substituições parciais sobrepostas
   const chavesOrdenadas = Object.keys(dicionario).sort((a, b) => b.length - a.length);
 
   for (const termoOriginal of chavesOrdenadas) {
     const codigo = dicionario[termoOriginal];
     
-    // ESCUDO DE SEGURANÇA: \b garante que só substitui a palavra/bloco inteiro exato
+    // Constrói regex robusta com limites de palavra (\b) suportando acentuação
     const escapedTermo = termoOriginal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`\\b${escapedTermo}\\b`, 'gi');
+    const regex = new RegExp(`(^|[^a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ])${escapedTermo}(?=[^a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ]|$)`, 'gi');
     
-    resultado = resultado.replace(regex, codigo);
+    resultado = resultado.replace(regex, (match, prefixo) => prefixo + codigo);
   }
 
   return {
