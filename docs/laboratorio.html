@@ -164,4 +164,252 @@
       border-radius: 8px;
       padding: 14px;
       display: flex;
-      flex-direction:
+      flex-direction: column;
+    }
+
+    label { font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: var(--accent); }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 10px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    .controls { margin-bottom: 16px; }
+
+    .action-btn {
+      background: var(--accent-hover);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
+    .action-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+    .stats {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+
+    .stat-value { font-size: 1.2rem; font-weight: bold; color: #fff; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Laboratório JDA-ZIP</h1>
+      <a href="index.html">&larr; Voltar à Central</a>
+    </header>
+
+    <div class="config-grid">
+      <!-- Origem do Dicionário -->
+      <div class="box-config">
+        <h3>1. Origem do Dicionário</h3>
+        <div class="options-row">
+          <button class="option-btn" id="btn-padrao" onclick="selecionarModo('padrao')">🟢 Padrão</button>
+          <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">🔄 Gerar Automático</button>
+          <label class="option-btn" id="btn-importar" style="cursor: pointer;">
+            📁 Importar JSON
+            <input type="file" id="file-input" accept=".json" style="display:none;" onchange="importarDicionario(event)">
+          </label>
+        </div>
+      </div>
+
+      <!-- Menu Gaveta: Modo de Fatiamento (Apenas Números) -->
+      <div class="box-config">
+        <h3>2. Modo de Fatiamento</h3>
+        <div class="dropdown" id="fatiamento-dropdown">
+          <button class="dropbtn" onclick="toggleDropdown()">
+            <span id="fatiamento-label">1</span> ▼
+          </button>
+          <div class="dropdown-content">
+            <button onclick="mudarFatiamento(1)">1</button>
+            <button onclick="mudarFatiamento(2)">2</button>
+            <button onclick="mudarFatiamento(3)">3</button>
+            <button onclick="mudarFatiamento(4)">4</button>
+            <button onclick="mudarFatiamento(5)">5</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Texto -->
+    <div class="editor-grid" id="editor-area">
+      <div class="panel">
+        <label for="input-text">Texto Original (Cole aqui):</label>
+        <textarea id="input-text" placeholder="Cole o texto ou relatório aqui..."></textarea>
+      </div>
+
+      <div class="panel">
+        <label for="output-text">Prévia da Compactação (Temporário em RAM):</label>
+        <textarea id="output-text" readonly placeholder="A prévia aparecerá aqui..."></textarea>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="action-btn" id="btn-compactar" disabled onclick="executarEExportar()">
+        💾 Compactar e Baixar Pacote (.jda + .json)
+      </button>
+    </div>
+
+    <div class="stats">
+      <div><span class="stat-value" id="orig-size">0 B</span><span class="stat-label">Original</span></div>
+      <div><span class="stat-value" id="comp-size">0 B</span><span class="stat-label">Compactado</span></div>
+      <div><span class="stat-value" id="ratio-val">0%</span><span class="stat-label">Redução</span></div>
+    </div>
+  </div>
+
+  <script src="engine.js"></script>
+  <script>
+    let modoSelecionado = null;
+    let dicionarioAtivo = {};
+    let tamanhoFatiamento = 1;
+
+    function toggleDropdown() {
+      document.getElementById('fatiamento-dropdown').classList.toggle('show');
+    }
+
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn') && !event.target.matches('.dropbtn *')) {
+        var dropdowns = document.getElementsByClassName("dropdown");
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+
+    function mudarFatiamento(valor) {
+      tamanhoFatiamento = valor;
+      document.getElementById('fatiamento-label').innerText = valor;
+      document.getElementById('fatiamento-dropdown').classList.remove('show');
+      processarTextoDinamico();
+    }
+
+    async function selecionarModo(modo) {
+      modoSelecionado = modo;
+      document.querySelectorAll('.box-config:first-child .option-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (modo === 'padrao') {
+        document.getElementById('btn-padrao').classList.add('active');
+        try {
+          const res = await fetch('dictionary.json');
+          const data = await res.json();
+          dicionarioAtivo = data.mapeamentos || {};
+        } catch(e) {
+          dicionarioAtivo = {};
+        }
+      } else if (modo === 'gerar') {
+        document.getElementById('btn-gerar').classList.add('active');
+        dicionarioAtivo = null;
+      }
+
+      desbloquearArea();
+      processarTextoDinamico();
+    }
+
+    function importarDicionario(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const content = JSON.parse(e.target.result);
+          dicionarioAtivo = content.mapeamentos || content;
+          modoSelecionado = 'importado';
+          
+          document.querySelectorAll('.box-config:first-child .option-btn').forEach(btn => btn.classList.remove('active'));
+          document.getElementById('btn-importar').classList.add('active');
+          
+          desbloquearArea();
+          processarTextoDinamico();
+          alert("Dicionário " + file.name + " carregado com sucesso!");
+        } catch(err) {
+          alert("Erro ao ler o arquivo JSON.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function desbloquearArea() {
+      document.getElementById('editor-area').classList.add('unlocked');
+      document.getElementById('btn-compactar').removeAttribute('disabled');
+    }
+
+    function processarTextoDinamico() {
+      const texto = document.getElementById('input-text').value;
+      if (!texto) return;
+
+      let dictParaUso = dicionarioAtivo;
+
+      if (modoSelecionado === 'gerar') {
+        dictParaUso = gerarDicionarioDinamico(texto, tamanhoFatiamento);
+      }
+
+      const res = compactarJDAZIP(texto, dictParaUso, tamanhoFatiamento);
+      document.getElementById('output-text').value = res.textoCompactado;
+
+      const origBytes = new Blob([texto]).size;
+      const compBytes = new Blob([res.textoCompactado]).size;
+      const economia = origBytes > 0 ? (((origBytes - compBytes) / origBytes) * 100).toFixed(1) : 0;
+
+      document.getElementById('orig-size').innerText = origBytes + " B";
+      document.getElementById('comp-size').innerText = compBytes + " B";
+      document.getElementById('ratio-val').innerText = (economia > 0 ? "-" + economia : "0") + "%";
+    }
+
+    document.getElementById('input-text').addEventListener('input', processarTextoDinamico);
+
+    function executarEExportar() {
+      const textoOriginal = document.getElementById('input-text').value;
+      if (!textoOriginal) {
+        alert("Digite ou cole algum texto antes de compactar.");
+        return;
+      }
+
+      let dictFinal = dicionarioAtivo;
+      if (modoSelecionado === 'gerar') {
+        dictFinal = gerarDicionarioDinamico(textoOriginal, tamanhoFatiamento);
+      }
+
+      const resultado = compactarJDAZIP(textoOriginal, dictFinal, tamanhoFatiamento);
+
+      baixarArquivoLocal(resultado.textoCompactado, 'texto_compactado.jda', 'text/plain');
+
+      const jsonDict = JSON.stringify({
+        versao: "1.2",
+        fatiamento: tamanhoFatiamento,
+        geradoEm: new Date().toISOString(),
+        mapeamentos: dictFinal
+      }, null, 2);
+
+      setTimeout(() => {
+        baixarArquivoLocal(jsonDict, 'dicionario_sessao.json', 'application/json');
+      }, 300);
+    }
+  </script>
+</body>
+</html>
