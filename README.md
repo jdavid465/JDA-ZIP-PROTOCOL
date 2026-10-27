@@ -114,9 +114,9 @@ Today, Artificial Intelligence has two massive bottlenecks: **network bandwidth 
 
 ### 💬 Let's Connect! / Vamos Debater!
 
-**EN:** Conceived and designed by *Jonathan D. Andrade*(jdavid465)** as an open conceptual architecture proposal. I am bringing the mental blueprint—now I invite developers, engineers, and researchers to join the conversation: How do you visualize building the code for this dictionary and anchor structure? Feel free to open an **Issue** or start a **Discussion**!
+**EN:** Conceived and designed by *Jonathan D. Andrade* **(jdavid465)** as an open conceptual architecture proposal. I am bringing the mental blueprint—now I invite developers, engineers, and researchers to join the conversation: How do you visualize building the code for this dictionary and anchor structure? Feel free to open an **Issue** or start a **Discussion**!
 
-**PT:** *Concebido e projetado por *Jonathan D. Andrade*(jdavid465)** como uma proposta conceitual de arquitetura aberta. Trago o modelo de arquitetura mental e agora convido desenvolvedores, engenheiros e pesquisadores a debaterem juntos: Como vocês visualizam a criação do código para essa estrutura de dicionários e âncoras? Fique à vontade para abrir uma **Issue** ou iniciar uma **Discussão**!*
+**PT:** *Concebido e projetado por *Jonathan D. Andrade* **(jdavid465)** como uma proposta conceitual de arquitetura aberta. Trago o modelo de arquitetura mental e agora convido desenvolvedores, engenheiros e pesquisadores a debaterem juntos: Como vocês visualizam a criação do código para essa estrutura de dicionários e âncoras? Fique à vontade para abrir uma **Issue** ou iniciar uma **Discussão**!*
 
 ---
 
