@@ -28,7 +28,7 @@
     }
 
     .wrapper {
-      max-width: 600px;
+      max-width: 650px;
       width: 100%;
       background: var(--panel);
       border: 1px solid var(--border);
@@ -39,7 +39,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
 
     header h1 {
@@ -65,14 +65,14 @@
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 24px;
+      padding: 20px;
       text-decoration: none;
       color: var(--text);
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
       gap: 16px;
-      margin-top: 16px;
+      margin-bottom: 12px;
     }
 
     .card:hover {
@@ -82,13 +82,13 @@
     }
 
     .card-icon {
-      font-size: 2rem;
+      font-size: 1.8rem;
     }
 
     .card h3 {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .card p {
@@ -112,20 +112,27 @@
     <header>
       <h1>JDA-ZIP</h1>
       <h2>Semantic Compression Protocol</h2>
-      <p>Central de operações</p>
+      <p>Central de operações — Selecione um módulo para começar</p>
     </header>
 
-    <!-- Apenas o Laboratório ativo -->
-    <a href="jdazip.html" class="card">
+    <a href="laboratorio.html" class="card">
       <div class="card-icon">🧪</div>
       <div>
-        <h3>Acessar Laboratório</h3>
-        <p>Testes de compressão, simulação de remoção de vogais e métricas em tempo real.</p>
+        <h3>Laboratório</h3>
+        <p>Testes de compressão, simulação e métricas em tempo real.</p>
+      </div>
+    </a>
+
+    <a href="#" class="card" onclick="alert('Módulo em estruturação para as próximas etapas.'); return false;" style="opacity: 0.6;">
+      <div class="card-icon">🗄️</div>
+      <div>
+        <h3>Dicionários (JSON)</h3>
+        <p>Gerenciamento e mapeamento de vocabulários globais e chaves.</p>
       </div>
     </a>
 
     <footer>
-      JDA-ZIP Protocol &bull; Hospedado no GitHub Pages
+      JDA-ZIP Protocol &bull; Arquitetura Modular
     </footer>
   </div>
 
