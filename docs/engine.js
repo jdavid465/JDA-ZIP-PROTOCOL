@@ -1,9 +1,8 @@
 /**
- * JDA-ZIP Engine v1.2 - Motor com Agrupamento (Fatiamento 1 a 5)
+ * JDA-ZIP Engine v1.3 - Motor Blindado com Delimitadores e Filtro de Tamanho
  * Roda 100% na memória RAM do navegador (Zero servidor)
  */
 
-// Função para gerar chaves sequenciais (1 a 99, depois a01 até z99)
 function gerarChaveDicionario(indice) {
   if (indice < 99) {
     return `~JZ${indice + 1};`;
@@ -18,15 +17,13 @@ function gerarChaveDicionario(indice) {
       return `~JZ${letra}${numFormatado};`;
     }
   }
-  return null; // Limite máximo
+  return null;
 }
 
-// Gerador dinâmico baseado no tamanho do fatiamento (n)
 function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
   const palavras = texto.match(/\b[a-zA-ZáàâãéèêíïóôõöúçÑñÁÀÂÃÉÈÍÓÔÕÖÚ]+\b/g) || [];
   const frequencias = {};
 
-  // Constrói os blocos (n-grams) conforme o tamanho do fatiamento
   for (let i = 0; i <= palavras.length - tamanhoBloco; i++) {
     const blocoArr = [];
     for (let j = 0; j < tamanhoBloco; j++) {
@@ -34,19 +31,21 @@ function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
     }
     
     const termoCompleto = blocoArr.join(' ');
-    if (tamanhoBloco === 1 && termoCompleto.length <= 2) continue;
+    
+    // FILTRO DE SEGURANÇA: Ignora blocos muito curtos (menos de 4 caracteres no total)
+    // Isso evita trocar palavras inúteis como "de", "em", "um" que incham o arquivo.
+    if (termoCompleto.length < 4) continue;
 
     const chaveTermo = termoCompleto.toLowerCase();
     frequencias[chaveTermo] = (frequencias[chaveTermo] || 0) + 1;
   }
 
-  // Filtra apenas termos que se repetem e cria o dicionário ordenado por frequência
   const dicionarioGerado = {};
   let indiceAtual = 0;
 
   Object.keys(frequencias)
     .filter(termo => frequencias[termo] > 1)
-    .sort((a, b) => frequencias[b] - frequencias[a])
+    .sort((a, b) => frequencias[b].length * frequencias[b] - frequencias[a].length * frequencias[a]) // Prioriza termos maiores e mais frequentes
     .forEach(termo => {
       const token = gerarChaveDicionario(indiceAtual);
       if (token) {
@@ -58,7 +57,6 @@ function gerarDicionarioDinamico(texto, tamanhoBloco = 1) {
   return dicionarioGerado;
 }
 
-// Função principal de compactação com suporte a blocos
 function compactarJDAZIP(texto, dicionario = {}, tamanhoBloco = 1) {
   if (!texto) return { textoCompactado: "", dicionarioUtilizado: {} };
 
@@ -67,7 +65,11 @@ function compactarJDAZIP(texto, dicionario = {}, tamanhoBloco = 1) {
 
   for (const termoOriginal of chavesOrdenadas) {
     const codigo = dicionario[termoOriginal];
-    const regex = new RegExp(termoOriginal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+    
+    // ESCUDO DE SEGURANÇA: \b garante que só substitui a palavra/bloco inteiro exato
+    const escapedTermo = termoOriginal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(`\\b${escapedTermo}\\b`, 'gi');
+    
     resultado = resultado.replace(regex, codigo);
   }
 
@@ -77,7 +79,6 @@ function compactarJDAZIP(texto, dicionario = {}, tamanhoBloco = 1) {
   };
 }
 
-// Função auxiliar para forçar o download local via Blob (Memória RAM)
 function baixarArquivoLocal(conteudo, nomeArquivo, tipoMime) {
   const blob = new Blob([conteudo], { type: tipoMime });
   const urlTemp = URL.createObjectURL(blob);
