@@ -81,6 +81,30 @@
       box-shadow: 0 4px 12px rgba(88, 166, 255, 0.1);
     }
 
+    /* Cartão desativado (não clicável) */
+    .card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .card.disabled:hover {
+      border-color: var(--border);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
     .card-icon {
       font-size: 1.8rem;
     }
@@ -123,11 +147,29 @@
       </div>
     </a>
 
-    <a href="#" class="card" onclick="alert('Módulo em estruturação para as próximas etapas.'); return false;" style="opacity: 0.6;">
+    <a href="abrir.html" class="card">
+      <div class="card-icon">🔓</div>
+      <div>
+        <h3>Abrir Pacote</h3>
+        <p>Restaure um arquivo .jda usando o dicionário certo (e a senha, se houver).</p>
+      </div>
+    </a>
+
+    <!-- Desativado: não é clicável -->
+    <div class="card disabled" aria-disabled="true">
       <div class="card-icon">🗄️</div>
       <div>
-        <h3>Dicionários (JSON)</h3>
+        <h3>Dicionários <span class="badge">em breve</span></h3>
         <p>Gerenciamento e mapeamento de vocabulários globais e chaves.</p>
+      </div>
+    </div>
+
+    <!-- Abre o repositório em uma nova aba -->
+    <a href="https://github.com/jdavid465/JDA-ZIP-PROTOCOL" class="card" target="_blank" rel="noopener noreferrer">
+      <div class="card-icon">🐙</div>
+      <div>
+        <h3>Repositório no GitHub</h3>
+        <p>Código-fonte, documentação, issues e discussões. Abre em uma nova aba.</p>
       </div>
     </a>
 
