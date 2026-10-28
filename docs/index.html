@@ -178,5 +178,47 @@
     </footer>
   </div>
 
+  
+<!-- JDA-ZIP | Contador de visitas -->
+<div id="jda-visit-counter" title="Visualizações da página"></div>
+
+<script
+  data-goatcounter="https://jda-zip.goatcounter.com/count"
+  async
+  src="https://gc.zgo.at/count.js"
+  onload="window.goatcounter.visit_count({
+    append: '#jda-visit-counter',
+    path: '/',
+    type: 'html',
+    no_branding: true,
+    style: `
+      div {
+        width: 42px;
+        height: 32px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        background: #171d29;
+        border: 1px solid #303b4d;
+        border-radius: 7px;
+        color: #dce6f5;
+        font: 600 12px monospace;
+      }
+      #gcvc-for, #gcvc-by {
+        display: none;
+      }
+      #gcvc-views {
+        color: #dce6f5;
+        font-size: 12px;
+        font-weight: 600;
+      }
+    `
+  })"
+></script>
+</body>
+
 </body>
 </html>
