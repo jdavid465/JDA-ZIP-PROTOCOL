@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JDA-ZIP — Abrir Pacote</title>
+  <style>
+    :root {
+      --bg: #0d1117; --panel: #161b22; --border: #30363d; --text: #c9d1d9;
+      --accent: #58a6ff; --accent-hover: #1f6feb; --muted: #8b949e;
+      --ok: #3fb950; --warn: #d29922; --err: #f85149;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    header { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.4rem; color: #fff; }
+    a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+      padding: 16px; margin-bottom: 16px; }
+    .panel h3 { font-size: 0.95rem; color: #fff; margin-bottom: 10px; }
+    label { display: block; font-weight: 600; font-size: 0.85rem; color: var(--accent); margin: 10px 0 6px; }
+    input[type=file], input[type=password] { width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); padding: 10px; font-size: 0.85rem; }
+    .check { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.85rem; }
+    textarea { width: 100%; height: 240px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); padding: 10px; font-family: monospace; font-size: 0.85rem; resize: vertical; }
+    .action-btn { background: var(--accent-hover); color: #fff; border: none; padding: 12px 20px;
+      border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.9rem; margin-bottom: 12px; }
+    .action-btn.sec { background: var(--panel); border: 1px solid var(--border); color: var(--text); margin: 12px 0 0; }
+    .status { display: none; padding: 12px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 16px; border: 1px solid; }
+    .status.ok { color: var(--ok); border-color: var(--ok); }
+    .status.aviso { color: var(--warn); border-color: var(--warn); }
+    .status.erro { color: var(--err); border-color: var(--err); }
+    .hint { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Abrir Pacote JDA-ZIP</h1>
+      <a href="index.html">&larr; Voltar à Central</a>
+    </header>
+
+    <div class="panel">
+      <h3>1. Arquivo compactado</h3>
+      <label for="f-jda">Arquivo .jda</label>
+      <input type="file" id="f-jda" accept=".jda,.txt">
+    </div>
+
+    <div class="panel">
+      <h3>2. Dicionário</h3>
+      <label for="f-dic">Arquivo .json ou .jdakey</label>
+      <input type="file" id="f-dic" accept=".json,.jdakey">
+      <div class="check">
+        <input type="checkbox" id="usar-global">
+        <span>Usar o dicionário global do site (em vez de um arquivo)</span>
+      </div>
+      <label for="senha">Senha (só se o dicionário for protegido)</label>
+      <input type="password" id="senha" placeholder="Senha do dicionário .jdakey">
+      <p class="hint">Tudo é aberto no seu navegador. Nada é enviado a nenhum servidor.</p>
+    </div>
+
+    <button class="action-btn" onclick="abrir()">🔓 Abrir pacote</button>
+    <div class="status" id="status"></div>
+
+    <div class="panel">
+      <h3>3. Texto restaurado</h3>
+      <textarea id="saida" readonly placeholder="O texto original aparecerá aqui..."></textarea>
+      <button class="action-btn sec" onclick="baixarTexto()">💾 Baixar texto restaurado (.txt)</button>
+    </div>
+  </div>
+
+  <script src="engine.js"></script>
+  <script>
+    function lerTexto(arquivo) {
+      return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = () => rej(new Error('Não foi possível ler o arquivo.'));
+        r.readAsText(arquivo);
+      });
+    }
+
+    function mostrar(msg, tipo) {
+      const s = document.getElementById('status');
+      s.textContent = msg;
+      s.className = 'status ' + tipo;
+      s.style.display = 'block';
+    }
+
+    async function abrir() {
+      const saida = document.getElementById('saida');
+      saida.value = '';
+
+      try {
+        const fJda = document.getElementById('f-jda').files[0];
+        if (!fJda) return mostrar('Escolha o arquivo .jda.', 'erro');
+
+        let dados;
+        if (document.getElementById('usar-global').checked) {
+          const resp = await fetch('dicionary.json');
+          if (!resp.ok) throw new Error('Não foi possível carregar o dicionário global.');
+          dados = await resp.json();
+        } else {
+          const fDic = document.getElementById('f-dic').files[0];
+          if (!fDic) return mostrar('Escolha o arquivo do dicionário ou marque o dicionário global.', 'erro');
+
+          let conteudo = await lerTexto(fDic);
+          if (ehDicionarioCifrado(conteudo)) {
+            const senha = document.getElementById('senha').value;
+            if (!senha) return mostrar('Este dicionário é protegido. Digite a senha.', 'erro');
+            conteudo = await decifrarDicionario(conteudo, senha);
+          }
+
+          try { dados = JSON.parse(conteudo); }
+          catch (e) { throw new Error('O arquivo do dicionário é inválido.'); }
+        }
+
+        const res = abrirPacoteJDAZIP(await lerTexto(fJda), dados);
+        if (!res.ok) return mostrar('✖ ' + res.erro, 'erro');
+
+        saida.value = res.texto;
+        if (res.aviso) mostrar('⚠ ' + res.aviso, 'aviso');
+        else mostrar('✔ Pacote aberto: o dicionário combina com o arquivo.', 'ok');
+      } catch (err) {
+        mostrar('✖ ' + err.message, 'erro');
+      }
+    }
+
+    function baixarTexto() {
+      const texto = document.getElementById('saida').value;
+      if (!texto) return mostrar('Não há texto restaurado para baixar.', 'erro');
+      baixarArquivoLocal(texto, 'texto_restaurado.txt', 'text/plain');
+    }
+  </script>
+</body>
+</html>

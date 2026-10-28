@@ -235,7 +235,7 @@
       text-align: center;
     }
 
-    .stat-value { font-size: 1.2rem; font-weight: bold; color: #fff; }
+    .stat-value { font-size: 1.2rem; font-weight: bold; color: #fff; display: block; }
     .stat-label { font-size: 0.75rem; color: var(--muted); }
   </style>
 </head>
@@ -248,13 +248,18 @@
     </header>
 
     <div class="config-grid">
-      <!-- Origem do Dicionário & Entrada (Três botões lado a lado) -->
+      <!-- Origem do Dicionário & Entrada -->
       <div class="box-config">
         <h3>1. Origem do Dicionário & Entrada</h3>
         <div class="options-row">
           <div class="option-group">
-            <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">🔄 Gerar Automático</button>
+            <button class="option-btn" id="btn-gerar" onclick="selecionarModo('gerar')">🔄 Gerar Novo Dicionário</button>
             <span class="upload-info">Cria do próprio texto</span>
+          </div>
+
+          <div class="option-group">
+            <button class="option-btn" id="btn-global" onclick="usarDicionarioGlobal()">🌐 Dicionário Global</button>
+            <span class="upload-info">Dicionário do site</span>
           </div>
           
           <div class="option-group">
@@ -275,8 +280,8 @@
         </div>
       </div>
 
-      <!-- Menu Gaveta: Modo de Fatiamento (Apenas Números) -->
-      <div class="box-config">
+      <!-- Menu Gaveta: Modo de Fatiamento (só vale em "Gerar Novo Dicionário") -->
+      <div class="box-config" id="box-fatiamento">
         <h3>2. Modo de Fatiamento</h3>
         <div class="dropdown" id="fatiamento-dropdown">
           <button class="dropbtn" onclick="toggleDropdown()">
@@ -290,6 +295,9 @@
             <button onclick="mudarFatiamento(5)">5</button>
           </div>
         </div>
+        <label style="display:block;margin-top:10px;font-size:0.8rem;font-weight:normal;color:var(--text);">
+          <input type="checkbox" id="embaralhar" onchange="processarTextoDinamico()"> Embaralhar chaves
+        </label>
       </div>
     </div>
 
@@ -307,8 +315,10 @@
     </div>
 
     <div class="controls">
+      <input type="password" id="senha-export" placeholder="Senha para proteger o dicionário (opcional)"
+        style="width:100%;margin-bottom:10px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);">
       <button class="action-btn" id="btn-compactar" disabled onclick="executarEExportar()">
-        💾 Compactar e Baixar Pacote (.jda + .json)
+        💾 Compactar e Baixar Pacote (.jda + dicionário)
       </button>
     </div>
 
@@ -316,6 +326,8 @@
       <div><span class="stat-value" id="orig-size">0 B</span><span class="stat-label">Original</span></div>
       <div><span class="stat-value" id="comp-size">0 B</span><span class="stat-label">Compactado</span></div>
       <div><span class="stat-value" id="ratio-val">0%</span><span class="stat-label">Redução</span></div>
+      <div><span class="stat-value" id="dict-size">0 B</span><span class="stat-label">Dicionário</span></div>
+      <div><span class="stat-value" id="check-val">—</span><span class="stat-label">Reversível?</span></div>
     </div>
   </div>
 
@@ -341,6 +353,19 @@
       }
     }
 
+    // O fatiamento e o embaralhamento só valem em "Gerar Novo Dicionário"
+    function atualizarEstadoFatiamento() {
+      const box = document.getElementById('box-fatiamento');
+      const ativo = modoSelecionado === 'gerar';
+      box.style.opacity = ativo ? '1' : '0.4';
+      box.style.pointerEvents = ativo ? 'auto' : 'none';
+    }
+
+    function limparBotoesAtivos() {
+      document.querySelectorAll('.box-config:first-child .option-btn')
+        .forEach(btn => btn.classList.remove('active'));
+    }
+
     function mudarFatiamento(valor) {
       tamanhoFatiamento = valor;
       document.getElementById('fatiamento-label').innerText = valor;
@@ -350,7 +375,7 @@
 
     function selecionarModo(modo) {
       modoSelecionado = modo;
-      document.querySelectorAll('.box-config:first-child .option-btn').forEach(btn => btn.classList.remove('active'));
+      limparBotoesAtivos();
 
       if (modo === 'gerar') {
         document.getElementById('btn-gerar').classList.add('active');
@@ -359,6 +384,25 @@
 
       desbloquearArea();
       processarTextoDinamico();
+    }
+
+    // Dicionário global: arquivo dicionary.json que fica junto do site
+    async function usarDicionarioGlobal() {
+      try {
+        const resp = await fetch('dicionary.json');
+        if (!resp.ok) throw new Error('arquivo não encontrado');
+        const content = await resp.json();
+        dicionarioAtivo = content.mapeamentos || content;
+        modoSelecionado = 'global';
+
+        limparBotoesAtivos();
+        document.getElementById('btn-global').classList.add('active');
+
+        desbloquearArea();
+        processarTextoDinamico();
+      } catch (err) {
+        alert('Não foi possível carregar o dicionário global: ' + err.message);
+      }
     }
 
     // Leitor de documentos (Apenas DOCX e PDF)
@@ -421,7 +465,7 @@
           dicionarioAtivo = content.mapeamentos || content;
           modoSelecionado = 'importado';
           
-          document.querySelectorAll('.box-config:first-child .option-btn').forEach(btn => btn.classList.remove('active'));
+          limparBotoesAtivos();
           document.getElementById('btn-importar').classList.add('active');
           
           desbloquearArea();
@@ -437,19 +481,23 @@
     function desbloquearArea() {
       document.getElementById('editor-area').classList.add('unlocked');
       document.getElementById('btn-compactar').removeAttribute('disabled');
+      atualizarEstadoFatiamento();
     }
 
     function processarTextoDinamico() {
       const texto = document.getElementById('input-text').value;
       if (!texto) return;
 
+      const gerado = modoSelecionado === 'gerar';
       let dictParaUso = dicionarioAtivo;
 
-      if (modoSelecionado === 'gerar') {
-        dictParaUso = gerarDicionarioDinamico(texto, tamanhoFatiamento);
+      if (gerado) {
+        dictParaUso = gerarDicionarioDinamico(
+          texto, tamanhoFatiamento, document.getElementById('embaralhar').checked
+        );
       }
 
-      const res = compactarJDAZIP(texto, dictParaUso, tamanhoFatiamento);
+      const res = compactarJDAZIP(texto, dictParaUso, tamanhoFatiamento, gerado);
       document.getElementById('output-text').value = res.textoCompactado;
 
       const origBytes = new Blob([texto]).size;
@@ -459,37 +507,44 @@
       document.getElementById('orig-size').innerText = origBytes + " B";
       document.getElementById('comp-size').innerText = compBytes + " B";
       document.getElementById('ratio-val').innerText = (economia > 0 ? "-" + economia : "0") + "%";
+
+      document.getElementById('dict-size').innerText =
+        new Blob([JSON.stringify(dictParaUso || {})]).size + " B";
+      const restaurado = descompactarJDAZIP(res.textoCompactado, dictParaUso || {});
+      document.getElementById('check-val').innerText = restaurado === texto ? "✔ Sim" : "⚠ Não";
     }
 
     document.getElementById('input-text').addEventListener('input', processarTextoDinamico);
 
-    function executarEExportar() {
+    async function executarEExportar() {
       const textoOriginal = document.getElementById('input-text').value;
       if (!textoOriginal) {
         alert("Digite ou cole algum texto antes de compactar.");
         return;
       }
 
+      const gerado = modoSelecionado === 'gerar';
       let dictFinal = dicionarioAtivo;
-      if (modoSelecionado === 'gerar') {
-        dictFinal = gerarDicionarioDinamico(textoOriginal, tamanhoFatiamento);
+      if (gerado) {
+        dictFinal = gerarDicionarioDinamico(
+          textoOriginal, tamanhoFatiamento, document.getElementById('embaralhar').checked
+        );
       }
 
-      const resultado = compactarJDAZIP(textoOriginal, dictFinal, tamanhoFatiamento);
+      const pacote = criarPacoteJDAZIP(textoOriginal, dictFinal, tamanhoFatiamento, gerado);
+      baixarArquivoLocal(pacote.jda, 'texto_' + pacote.id + '.jda', 'text/plain');
 
-      baixarArquivoLocal(resultado.textoCompactado, 'texto_compactado.jda', 'text/plain');
-
-      const jsonDict = JSON.stringify({
-        versao: "1.4",
-        fatiamento: tamanhoFatiamento,
-        geradoEm: new Date().toISOString(),
-        mapeamentos: dictFinal
-      }, null, 2);
-
-      setTimeout(() => {
-        baixarArquivoLocal(jsonDict, 'dicionario_sessao.json', 'application/json');
-      }, 300);
+      let conteudo = pacote.json;
+      let nome = 'dicionario_' + pacote.id + '.json';
+      const senha = document.getElementById('senha-export').value;
+      if (senha) {
+        conteudo = await cifrarDicionario(pacote.json, senha);
+        nome = 'dicionario_' + pacote.id + '.jdakey';
+      }
+      setTimeout(() => baixarArquivoLocal(conteudo, nome, 'application/json'), 300);
     }
+
+    atualizarEstadoFatiamento();
   </script>
 </body>
 </html>
