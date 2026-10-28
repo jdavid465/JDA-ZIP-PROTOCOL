@@ -262,12 +262,32 @@ Abra uma **Issue** com:
 
 * * *
 
-## 📄 License / Licença
+## 📜 Autoria, histórico e licenciamento
 
-GPL-3.0
+O **JDA-ZIP-PROTOCOL** é uma proposta concebida, documentada e desenvolvida por **Jonathan D. Andrade**.
 
-&nbsp;
+O projeto é aberto e permite que qualquer pessoa estude, implemente, adapte, aperfeiçoe e explore comercialmente suas propostas.
 
-Created by **Jonathan D. Andrade** ([jdavid465](https://github.com/jdavid465)) as an open experiment.
+A intenção não é reivindicar propriedade exclusiva sobre ideias, conceitos ou métodos, mas preservar o reconhecimento da contribuição original e o registro histórico de sua concepção e publicação.
 
-*Criado por **Jonathan D. Andrade** ([jdavid465](https://github.com/jdavid465)) como um experimento aberto.*
+A utilização ou adaptação da documentação original deve respeitar a atribuição de autoria prevista na licença CC BY 4.0.
+
+### 👤 Autor e idealizador
+
+**Jonathan D. Andrade** — [@jdavid465](https://github.com/jdavid465)
+
+### 📄 Licenciamento
+
+- **Código-fonte:** GNU General Public License v3.0 (GPL-3.0).
+- **Documentação e materiais autorais:** Creative Commons Attribution 4.0 International (CC BY 4.0).
+- **Uso comercial:** permitido, respeitando os termos das respectivas licenças.
+
+### 🔗 Histórico e referências
+
+[Repositório oficial do JDA-ZIP-PROTOCOL](https://github.com/jdavid465/JDA-ZIP-PROTOCOL/)
+
+O conhecimento pode ser compartilhado, aprimorado e transformado. O reconhecimento de sua origem também deve ser preservado.
+
+**Licenças:**
+- [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)
+- [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
