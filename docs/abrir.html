@@ -51,13 +51,10 @@
     </div>
 
     <div class="panel">
-      <h3>2. Dicionário</h3>
+      <h3>2. Dicionário (só se for privado)</h3>
+      <p class="hint" style="margin-bottom:6px;">Arquivos feitos com o dicionário global abrem sozinhos: o site busca a versão certa pelo cabeçalho. Para dicionário privado, envie o arquivo dele.</p>
       <label for="f-dic">Arquivo .json ou .jdakey</label>
       <input type="file" id="f-dic" accept=".json,.jdakey">
-      <div class="check">
-        <input type="checkbox" id="usar-global">
-        <span>Usar o dicionário global do site (em vez de um arquivo)</span>
-      </div>
       <label for="senha">Senha (só se o dicionário for protegido)</label>
       <input type="password" id="senha" placeholder="Senha do dicionário .jdakey">
       <p class="hint">Tudo é aberto no seu navegador. Nada é enviado a nenhum servidor.</p>
@@ -99,32 +96,30 @@
         const fJda = document.getElementById('f-jda').files[0];
         if (!fJda) return mostrar('Escolha o arquivo .jda.', 'erro');
 
-        let dados;
-        if (document.getElementById('usar-global').checked) {
-          const resp = await fetch('dicionary.json');
-          if (!resp.ok) throw new Error('Não foi possível carregar o dicionário global.');
-          dados = await resp.json();
-        } else {
+        const conteudoJda = await lerTexto(fJda);
+        const cab = lerCabecalhoJDAZIP(conteudoJda);
+
+        let dados = null;
+        if (!cab || cab.tipo !== 'global') {
           const fDic = document.getElementById('f-dic').files[0];
-          if (!fDic) return mostrar('Escolha o arquivo do dicionário ou marque o dicionário global.', 'erro');
-
-          let conteudo = await lerTexto(fDic);
-          if (ehDicionarioCifrado(conteudo)) {
-            const senha = document.getElementById('senha').value;
-            if (!senha) return mostrar('Este dicionário é protegido. Digite a senha.', 'erro');
-            conteudo = await decifrarDicionario(conteudo, senha);
+          if (fDic) {
+            let conteudo = await lerTexto(fDic);
+            if (ehDicionarioCifrado(conteudo)) {
+              const senha = document.getElementById('senha').value;
+              if (!senha) return mostrar('Este dicionário é protegido. Digite a senha.', 'erro');
+              conteudo = await decifrarDicionario(conteudo, senha);
+            }
+            try { dados = JSON.parse(conteudo); }
+            catch (e) { throw new Error('O arquivo do dicionário é inválido.'); }
           }
-
-          try { dados = JSON.parse(conteudo); }
-          catch (e) { throw new Error('O arquivo do dicionário é inválido.'); }
         }
 
-        const res = abrirPacoteJDAZIP(await lerTexto(fJda), dados);
+        const res = await abrirPacoteAutomatico(conteudoJda, dados);
         if (!res.ok) return mostrar('✖ ' + res.erro, 'erro');
 
         saida.value = res.texto;
         if (res.aviso) mostrar('⚠ ' + res.aviso, 'aviso');
-        else mostrar('✔ Pacote aberto: o dicionário combina com o arquivo.', 'ok');
+        else mostrar('✔ Pacote aberto. ' + (res.info || ''), 'ok');
       } catch (err) {
         mostrar('✖ ' + err.message, 'erro');
       }

@@ -7,12 +7,12 @@
  * Roda 100% na memória RAM do navegador (Zero servidor)
  */
 
-const VERSAO_JDAZIP = "1.8";
+const VERSAO_JDAZIP = "1.9";
 const REGEX_PARTES = /[A-Za-zÀ-ÖØ-öø-ÿ0-9]+|[^A-Za-zÀ-ÖØ-öø-ÿ0-9]+/g;
 const EH_PALAVRA = /^[A-Za-zÀ-ÖØ-öø-ÿ0-9]/;
 const FIM_DE_FRASE = /[.!?;\n]/;
 const REGEX_CHAVE = /~JZ[0-9a-z]+;/g;
-const REGEX_CABECALHO = /^\[JDA-ZIP:v[^:\]]+:([^\]]+)\]\r?\n---\r?\n/;
+const REGEX_CABECALHO = /^\[JDA-ZIP:v([^:\]]+):([^\]]+)\]\r?\n---\r?\n/;
 
 function temChave(obj, chave) {
   return Object.prototype.hasOwnProperty.call(obj, chave);
@@ -137,15 +137,54 @@ function descompactarJDAZIP(textoCompactado, dicionario = {}) {
   return textoCompactado.replace(REGEX_CHAVE, c => (temChave(inverso, c) ? inverso[c] : c));
 }
 
-// Cria os dois arquivos do pacote, já com o mesmo ID nos dois
-function criarPacoteJDAZIP(texto, dicionario, tamanhoBloco = 1, porBlocos = false) {
+// Lê o cabeçalho do .jda. Formatos aceitos:
+//   [JDA-ZIP:v1.9:dic=global@2]       -> dicionário global, versão 2
+//   [JDA-ZIP:v1.9:dic=privado:ID]     -> dicionário privado com esse ID
+//   [JDA-ZIP:v1.8:ID]                 -> formato antigo (privado)
+function lerCabecalhoJDAZIP(conteudo) {
+  const m = conteudo.match(REGEX_CABECALHO);
+  if (!m) return null;
+  const campo = m[2];
+  let tipo = 'privado', versaoDic = null, id = null;
+  const g = campo.match(/^dic=global@(\d+)$/);
+  if (g) {
+    tipo = 'global';
+    versaoDic = parseInt(g[1], 10);
+  } else {
+    const p = campo.match(/^dic=privado:(.+)$/);
+    id = p ? p[1] : campo;
+  }
+  return { versaoFormato: m[1], tipo, versaoDic, id, corpo: conteudo.slice(m[0].length) };
+}
+
+// Dicionários globais ficam em dicionarios/ (indice.json + global-vN.json).
+// Uma versão publicada nunca é alterada: melhorias viram versão nova.
+async function carregarIndiceGlobal(pasta = 'dicionarios/') {
+  const r = await fetch(pasta + 'indice.json');
+  if (!r.ok) throw new Error('indice.json não encontrado');
+  return r.json();
+}
+
+async function carregarDicionarioGlobal(versao, pasta = 'dicionarios/') {
+  const r = await fetch(`${pasta}global-v${versao}.json`);
+  if (!r.ok) throw new Error(`versão ${versao} não encontrada`);
+  const d = await r.json();
+  return d.mapeamentos || d;
+}
+
+// Cria o pacote. Com opcoes.versaoGlobal, o cabeçalho registra a versão do
+// dicionário global usado e nenhum arquivo de dicionário é gerado (json = null).
+function criarPacoteJDAZIP(texto, dicionario, tamanhoBloco = 1, porBlocos = false, opcoes = {}) {
   const id = gerarIdDicionario();
   const { textoCompactado } = compactarJDAZIP(texto, dicionario, tamanhoBloco, porBlocos);
+  const global = !!opcoes.versaoGlobal;
+  const campo = global ? `dic=global@${opcoes.versaoGlobal}` : `dic=privado:${id}`;
 
   return {
     id,
-    jda: `[JDA-ZIP:v${VERSAO_JDAZIP}:${id}]\n---\n${textoCompactado}`,
-    json: JSON.stringify({
+    tipo: global ? 'global' : 'privado',
+    jda: `[JDA-ZIP:v${VERSAO_JDAZIP}:${campo}]\n---\n${textoCompactado}`,
+    json: global ? null : JSON.stringify({
       versao: VERSAO_JDAZIP,
       id,
       fatiamento: tamanhoBloco,
@@ -155,12 +194,12 @@ function criarPacoteJDAZIP(texto, dicionario, tamanhoBloco = 1, porBlocos = fals
   };
 }
 
-// Abre um .jda com o dicionário (objeto lido do .json) e confere se combinam
+// Abre um .jda com um dicionário já em mãos e confere o ID (dicionário privado)
 function abrirPacoteJDAZIP(conteudoJda, dadosDicionario = {}) {
   const mapa = dadosDicionario.mapeamentos || dadosDicionario;
   const idDicionario = dadosDicionario.mapeamentos ? (dadosDicionario.id || null) : null;
-  const cab = conteudoJda.match(REGEX_CABECALHO);
-  const idArquivo = cab ? cab[1] : null;
+  const cab = lerCabecalhoJDAZIP(conteudoJda);
+  const idArquivo = (cab && cab.tipo === 'privado') ? cab.id : null;
 
   if (idArquivo && idDicionario && idArquivo !== idDicionario) {
     return {
@@ -169,14 +208,42 @@ function abrirPacoteJDAZIP(conteudoJda, dadosDicionario = {}) {
     };
   }
 
-  const corpo = cab ? conteudoJda.slice(cab[0].length) : conteudoJda;
   return {
     ok: true,
-    texto: descompactarJDAZIP(corpo, mapa),
+    texto: descompactarJDAZIP(cab ? cab.corpo : conteudoJda, mapa),
     aviso: (idArquivo && !idDicionario)
       ? "Este dicionário não tem ID, então não foi possível confirmar se é o correto."
       : null
   };
+}
+
+// Abre qualquer pacote: global (busca a versão certa sozinho) ou privado
+async function abrirPacoteAutomatico(conteudoJda, dadosDicionario = null, pasta = 'dicionarios/') {
+  const cab = lerCabecalhoJDAZIP(conteudoJda);
+
+  if (cab && cab.tipo === 'global') {
+    let dic = null;
+    try { dic = await carregarDicionarioGlobal(cab.versaoDic, pasta); } catch (e) { dic = null; }
+    if (!dic) {
+      return {
+        ok: false,
+        erro: `A versão ${cab.versaoDic} do dicionário global não foi encontrada. Atualize a página ou verifique a conexão.`
+      };
+    }
+    return {
+      ok: true,
+      texto: descompactarJDAZIP(cab.corpo, dic),
+      aviso: null,
+      info: `Dicionário global v${cab.versaoDic} (escolhido automaticamente pelo cabeçalho).`
+    };
+  }
+
+  if (!dadosDicionario) {
+    return { ok: false, erro: 'Este arquivo usa um dicionário privado. Envie o arquivo do dicionário.' };
+  }
+  const r = abrirPacoteJDAZIP(conteudoJda, dadosDicionario);
+  if (r.ok) r.info = 'Dicionário privado conferido pelo ID.';
+  return r;
 }
 
 function baixarArquivoLocal(conteudo, nomeArquivo, tipoMime) {

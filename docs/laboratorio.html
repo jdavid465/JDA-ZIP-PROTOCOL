@@ -260,6 +260,8 @@
           <div class="option-group">
             <button class="option-btn" id="btn-global" onclick="usarDicionarioGlobal()">🌐 Dicionário Global</button>
             <span class="upload-info">Dicionário do site</span>
+            <select id="versao-global" onchange="usarDicionarioGlobal(this.value)"
+              style="display:none;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px;font-size:0.78rem;"></select>
           </div>
           
           <div class="option-group">
@@ -386,13 +388,29 @@
       processarTextoDinamico();
     }
 
-    // Dicionário global: arquivo dicionary.json que fica junto do site
-    async function usarDicionarioGlobal() {
+    // Dicionário global versionado (pasta dicionarios/): a versão mais recente já vem marcada
+    let versaoGlobalAtiva = null;
+
+    async function usarDicionarioGlobal(versaoEscolhida) {
       try {
-        const resp = await fetch('dicionary.json');
-        if (!resp.ok) throw new Error('arquivo não encontrado');
-        const content = await resp.json();
-        dicionarioAtivo = content.mapeamentos || content;
+        const seletor = document.getElementById('versao-global');
+        const indice = await carregarIndiceGlobal();
+
+        if (seletor.options.length === 0) {
+          indice.versoes.slice().sort((x, y) => y.versao - x.versao).forEach(v => {
+            const op = document.createElement('option');
+            op.value = v.versao;
+            op.textContent = 'v' + v.versao + (v.versao === indice.maisRecente ? ' (mais recente)' : '');
+            seletor.appendChild(op);
+          });
+        }
+
+        const versao = parseInt(versaoEscolhida || indice.maisRecente, 10);
+        seletor.value = String(versao);
+        seletor.style.display = 'block';
+
+        dicionarioAtivo = await carregarDicionarioGlobal(versao);
+        versaoGlobalAtiva = versao;
         modoSelecionado = 'global';
 
         limparBotoesAtivos();
@@ -508,8 +526,9 @@
       document.getElementById('comp-size').innerText = compBytes + " B";
       document.getElementById('ratio-val').innerText = (economia > 0 ? "-" + economia : "0") + "%";
 
-      document.getElementById('dict-size').innerText =
-        new Blob([JSON.stringify(dictParaUso || {})]).size + " B";
+      document.getElementById('dict-size').innerText = modoSelecionado === 'global'
+        ? 'global v' + versaoGlobalAtiva
+        : new Blob([JSON.stringify(dictParaUso || {})]).size + " B";
       const restaurado = descompactarJDAZIP(res.textoCompactado, dictParaUso || {});
       document.getElementById('check-val').innerText = restaurado === texto ? "✔ Sim" : "⚠ Não";
     }
@@ -531,8 +550,13 @@
         );
       }
 
-      const pacote = criarPacoteJDAZIP(textoOriginal, dictFinal, tamanhoFatiamento, gerado);
-      baixarArquivoLocal(pacote.jda, 'texto_' + pacote.id + '.jda', 'text/plain');
+      const ehGlobal = modoSelecionado === 'global';
+      const pacote = criarPacoteJDAZIP(textoOriginal, dictFinal, tamanhoFatiamento, gerado,
+        ehGlobal ? { versaoGlobal: versaoGlobalAtiva } : {});
+      const sufixo = ehGlobal ? '_global-v' + versaoGlobalAtiva : '';
+      baixarArquivoLocal(pacote.jda, 'texto_' + pacote.id + sufixo + '.jda', 'text/plain');
+
+      if (!pacote.json) return; // dicionário global: não há dicionário para baixar
 
       let conteudo = pacote.json;
       let nome = 'dicionario_' + pacote.id + '.json';
