@@ -1,0 +1,85 @@
+# Licensing, Authorship and Attribution
+
+**Author:** Jonathan D. Andrade  
+**Projects:** JDA-ZIP-PROTOCOL and JDA-ZIP UDE  
+**Documentation license:** Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+## 1. Purpose
+
+The JDA-ZIP-PROTOCOL and JDA-ZIP UDE projects are intended to be open initiatives.
+
+Their documentation, specifications, architectural proposals, and explanatory materials are made available so that individuals, researchers, developers, and organizations can study, use, share, modify, and build upon them, including for commercial purposes.
+
+The goal is to encourage collaboration, experimentation, and further development.
+
+## 2. Authorship and attribution
+
+The original documentation and proposals published under these projects were authored and documented by **Jonathan D. Andrade**.
+
+Anyone using, reproducing, distributing, or adapting material covered by the CC BY 4.0 license must provide appropriate attribution, include a reference to the license, and indicate whether changes were made.
+
+Suggested attribution:
+
+> Original project and documentation: JDA-ZIP-PROTOCOL / JDA-ZIP UDE  
+> Author: Jonathan D. Andrade  
+> Source: https://github.com/jdavid465/JDA-ZIP-PROTOCOL/  
+> License: CC BY 4.0
+
+Attribution does not imply endorsement by the original author.
+
+## 3. JDA-ZIP-PROTOCOL
+
+The JDA-ZIP-PROTOCOL explores semantic and reference-based compression techniques using dictionaries, identifiers, and shared references to reduce the amount of data transmitted between systems.
+
+The project's documentation, specifications, diagrams, and explanatory materials are licensed under **CC BY 4.0**, unless otherwise stated.
+
+The project's source code remains governed by the **GNU General Public License v3.0 (GPL-3.0)**, as indicated by the repository's main license.
+
+These licenses have different scopes: CC BY 4.0 applies to the designated documentation, while GPL-3.0 applies to the source code.
+
+## 4. JDA-ZIP UDE
+
+JDA-ZIP UDE (Universal Dynamic Evolutionary Dictionary) is an architectural proposal for a universal, dynamic, and evolutionary dictionary.
+
+Its documentation, specifications, diagrams, and architectural descriptions are licensed under **CC BY 4.0**.
+
+The proposal is open to study, implementation, adaptation, and commercial exploration, provided that the applicable attribution requirements are respected.
+
+Any future software implementation may have its own software license, explicitly identified in the relevant repository or directory.
+
+## 5. Commercial use and modifications
+
+Commercial use is permitted.
+
+Users may:
+
+- Implement the described concepts and architectures.
+- Create derivative works and adaptations of the licensed documentation.
+- Develop commercial products and services based on their own implementations.
+- Share, publish, and redistribute adapted materials.
+- Contribute improvements and new implementations.
+
+When using or adapting material covered by CC BY 4.0, appropriate attribution must be maintained and modifications must be identified.
+
+## 6. Historical documentation and references
+
+The project maintains documentation, authorship records, changelogs, repository history, and external publications to establish a chronological record of its development.
+
+These records identify the author's documented contributions and the evolution of the proposals.
+
+The projects also acknowledge relevant previous research, technologies, and existing approaches. Their purpose is to describe the specific contributions made within JDA-ZIP and JDA-ZIP UDE, without claiming ownership of general concepts or independently developed implementations.
+
+## 7. License references
+
+**Creative Commons Attribution 4.0 International (CC BY 4.0)**  
+https://creativecommons.org/licenses/by/4.0/
+
+**GNU General Public License v3.0 (GPL-3.0)**  
+https://www.gnu.org/licenses/gpl-3.0.html
+
+---
+
+**Jonathan D. Andrade**  
+Original author and proposer of JDA-ZIP-PROTOCOL and JDA-ZIP UDE.
+
+*Open development. Shared knowledge. Proper attribution.*
