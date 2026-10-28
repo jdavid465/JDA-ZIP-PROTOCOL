@@ -1,1 +1,12 @@
-
+{
+  "formato": 1,
+  "maisRecente": 1,
+  "versoes": [
+    {
+      "versao": 1,
+      "arquivo": "global-v1.json",
+      "criadoEm": "2026-10-27",
+      "descricao": "Primeira versão: termos e frases frequentes de laudos veterinários e instruções fixas de prompts."
+    }
+  ]
+}
