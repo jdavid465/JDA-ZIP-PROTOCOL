@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JDA-ZIP Protocol — Central de Operações</title>
+
   <style>
     :root {
       --bg: #0d1117;
@@ -14,10 +16,15 @@
       --muted: #8b949e;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text);
       display: flex;
@@ -81,7 +88,7 @@
       box-shadow: 0 4px 12px rgba(88, 166, 255, 0.1);
     }
 
-    /* Cartão desativado (não clicável) */
+    /* Cartão desativado */
     .card.disabled {
       opacity: 0.5;
       cursor: not-allowed;
@@ -120,6 +127,7 @@
       color: var(--muted);
     }
 
+    /* Rodapé */
     footer {
       text-align: center;
       margin-top: 24px;
@@ -128,11 +136,34 @@
       border-top: 1px solid var(--border);
       padding-top: 16px;
     }
+
+    /* Contador autônomo */
+    .visitor-counter {
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .visitor-counter span {
+      min-width: 42px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #8b949e;
+      font: 600 12px monospace;
+      padding: 0 8px;
+    }
   </style>
 </head>
+
 <body>
 
   <div class="wrapper">
+
     <header>
       <h1>JDA-ZIP</h1>
       <h2>Semantic Compression Protocol</h2>
@@ -155,7 +186,7 @@
       </div>
     </a>
 
-    <!-- Desativado: não é clicável -->
+    <!-- Dicionários desativados -->
     <div class="card disabled" aria-disabled="true">
       <div class="card-icon">🗄️</div>
       <div>
@@ -164,8 +195,13 @@
       </div>
     </div>
 
-    <!-- Abre o repositório em uma nova aba -->
-    <a href="https://github.com/jdavid465/JDA-ZIP-PROTOCOL" class="card" target="_blank" rel="noopener noreferrer">
+    <!-- Repositório GitHub -->
+    <a
+      href="https://github.com/jdavid465/JDA-ZIP-PROTOCOL"
+      class="card"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <div class="card-icon">🐙</div>
       <div>
         <h3>Repositório no GitHub</h3>
@@ -175,50 +211,30 @@
 
     <footer>
       JDA-ZIP Protocol &bull; Arquitetura Modular
+
+      <!-- Contador de visitas local -->
+      <div class="visitor-counter">
+        <span id="jda-counter">0</span>
+      </div>
     </footer>
+
   </div>
 
-  
-<!-- JDA-ZIP | Contador de visitas -->
-<div id="jda-visit-counter" title="Visualizações da página"></div>
+  <!-- Sistema autônomo de contagem -->
+  <script>
+    (() => {
+      const counterKey = "jda_zip_visits";
 
-<script
-  data-goatcounter="https://jda-zip.goatcounter.com/count"
-  async
-  src="https://gc.zgo.at/count.js"
-  onload="window.goatcounter.visit_count({
-    append: '#jda-visit-counter',
-    path: '/',
-    type: 'html',
-    no_branding: true,
-    style: `
-      div {
-        width: 42px;
-        height: 32px;
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0;
-        padding: 0;
-        background: #171d29;
-        border: 1px solid #303b4d;
-        border-radius: 7px;
-        color: #dce6f5;
-        font: 600 12px monospace;
-      }
-      #gcvc-for, #gcvc-by {
-        display: none;
-      }
-      #gcvc-views {
-        color: #dce6f5;
-        font-size: 12px;
-        font-weight: 600;
-      }
-    `
-  })"
-></script>
-</body>
+      let visits = Number(localStorage.getItem(counterKey) || 0);
+
+      visits++;
+
+      localStorage.setItem(counterKey, visits);
+
+      document.getElementById("jda-counter").textContent =
+        visits.toLocaleString("pt-BR");
+    })();
+  </script>
 
 </body>
 </html>
